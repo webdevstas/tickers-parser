@@ -7,12 +7,14 @@ import (
 	"net/http"
 	"os"
 	"tickers-parser/modules"
+	"tickers-parser/modules/db"
 )
 
 func NewHandler(logger modules.Logger) (http.Handler, error) {
 	logger.Print("Executing NewHandler.")
+
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
-		logger.Print("[" + req.Method + "]" + req.RequestURI + "\n")
+		logger.Info("[" + req.Method + "]" + req.RequestURI + "\n")
 	}), nil
 }
 
@@ -48,7 +50,7 @@ func main() {
 			modules.NewLoggerModule,
 			modules.NewConfigModule,
 			modules.NewMonitoringModule,
-			//db.NewDbConnection,
+			db.NewDbConnection,
 			NewHandler,
 			NewMux,
 		),
