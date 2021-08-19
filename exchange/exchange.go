@@ -1,9 +1,15 @@
 package exchange
 
+import "fmt"
+
 type Exchange struct {
-	name         string
-	url          string
-	foundationOn int
+	Name         string
+	Url          string
+	FoundationOn int
+}
+
+func (e Exchange) PrintName() {
+	fmt.Printf("name: %v\n", e.Name)
 }
 
 func newExchange(name string, url string, year int) Exchange {
