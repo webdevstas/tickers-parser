@@ -38,15 +38,17 @@ func NewMux(lc fx.Lifecycle, logger modules.Logger) *http.ServeMux {
 	return mux
 }
 
-func Register(mux *http.ServeMux, h http.Handler, logger modules.Logger) {
+func Register(mux *http.ServeMux, h http.Handler) {
 	mux.Handle("/", h)
 }
 
 func main() {
 	app := fx.New(
 		fx.Provide(
-			modules.NewLogger,
-			modules.NewMonitoring,
+			modules.NewLoggerModule,
+			modules.NewConfigModule,
+			modules.NewMonitoringModule,
+			//db.NewDbConnection,
 			NewHandler,
 			NewMux,
 		),
