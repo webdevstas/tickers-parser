@@ -8,11 +8,11 @@ import (
 	"os"
 	"tickers-parser/modules"
 	"tickers-parser/modules/db"
+	"tickers-parser/modules/scheduler"
 )
 
 func NewHandler(logger modules.Logger) (http.Handler, error) {
 	logger.Print("Executing NewHandler.")
-
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		logger.Info("[" + req.Method + "]" + req.RequestURI + "\n")
 	}), nil
@@ -51,6 +51,7 @@ func main() {
 			modules.NewConfigModule,
 			modules.NewMonitoringModule,
 			db.NewDbConnection,
+			scheduler.NewSchedulerModule,
 			NewHandler,
 			NewMux,
 		),
