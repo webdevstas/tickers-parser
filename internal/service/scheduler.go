@@ -1,8 +1,4 @@
-package scheduler
-
-import (
-	"tickers-parser/modules"
-)
+package service
 
 type taskFunction func(args ...interface{}) (interface{}, error)
 
@@ -18,7 +14,7 @@ type IScheduler interface {
 }
 
 type Scheduler struct {
-	logger modules.Logger
+	logger Logger
 	IScheduler
 }
 
@@ -32,7 +28,7 @@ func (s *Scheduler) RunTask(name string, function taskFunction, args ...interfac
 	return res, nil
 }
 
-func NewSchedulerModule(l modules.Logger) *Scheduler {
+func NewSchedulerModule(l Logger) *Scheduler {
 	s := Scheduler{logger: l}
 	return &s
 }

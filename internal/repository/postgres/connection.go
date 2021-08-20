@@ -1,11 +1,11 @@
-package db
+package postgres
 
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
-	"tickers-parser/modules"
+	"tickers-parser/internal/service"
 )
 
 type DbConf struct {
@@ -16,13 +16,13 @@ type DbConf struct {
 	password string
 }
 
-func NewDbConnection(config *viper.Viper, logger modules.Logger) (*sqlx.DB, error) {
+func NewDbConnection(config *viper.Viper, logger service.Logger) (*sqlx.DB, error) {
 	var conf = DbConf{
-		host:     config.GetString("url"),
-		port:     config.GetString("port"),
-		user:     config.GetString("user"),
-		dbname:   config.GetString("database"),
-		password: config.GetString("password"),
+		host:     config.GetString("postgres.url"),
+		port:     config.GetString("postgres.port"),
+		user:     config.GetString("postgres.user"),
+		dbname:   config.GetString("postgres.database"),
+		password: config.GetString("postgres.password"),
 	}
 
 	var db *sqlx.DB

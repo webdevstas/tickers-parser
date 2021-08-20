@@ -1,13 +1,14 @@
-package modules
+package config
 
 import (
 	"github.com/spf13/viper"
+	"tickers-parser/internal/service"
 )
 
-func NewConfigModule(logger Logger) *viper.Viper {
+func NewConfigModule(logger service.Logger) *viper.Viper {
 	viper.SetConfigName("default")
 	viper.SetConfigType("yaml")
-	viper.AddConfigPath("./config")
+	viper.AddConfigPath("./configs")
 	err := viper.ReadInConfig()
 	if err != nil {
 		logger.Errorf("Config error: %v", err)

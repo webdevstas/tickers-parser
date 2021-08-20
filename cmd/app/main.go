@@ -6,19 +6,19 @@ import (
 	"go.uber.org/fx/fxevent"
 	"net/http"
 	"os"
-	"tickers-parser/modules"
-	"tickers-parser/modules/db"
-	"tickers-parser/modules/scheduler"
+	modules2 "tickers-parser/internal/config"
+	"tickers-parser/internal/repository/postgres"
+	"tickers-parser/internal/service"
 )
 
-func NewHandler(logger modules.Logger) (http.Handler, error) {
+func NewHandler(logger service.Logger) (http.Handler, error) {
 	logger.Print("Executing NewHandler.")
 	return http.HandlerFunc(func(res http.ResponseWriter, req *http.Request) {
 		logger.Info("[" + req.Method + "]" + req.RequestURI + "\n")
 	}), nil
 }
 
-func NewMux(lc fx.Lifecycle, logger modules.Logger) *http.ServeMux {
+func NewMux(lc fx.Lifecycle, logger service.Logger) *http.ServeMux {
 	logger.Print("Executing NewMux.")
 	mux := http.NewServeMux()
 	server := &http.Server{
@@ -47,11 +47,11 @@ func Register(mux *http.ServeMux, h http.Handler) {
 func main() {
 	app := fx.New(
 		fx.Provide(
-			modules.NewLoggerModule,
-			modules.NewConfigModule,
-			modules.NewMonitoringModule,
-			db.NewDbConnection,
-			scheduler.NewSchedulerModule,
+			service.NewLoggerModule,
+			modules2.NewConfigModule,
+			service.NewMonitoringModule,
+			postgres.NewDbConnection,
+			service.NewSchedulerModule,
 			NewHandler,
 			NewMux,
 		),
