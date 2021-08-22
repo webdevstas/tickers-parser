@@ -30,7 +30,12 @@ func NewMux(lc fx.Lifecycle, logger service.Logger) *http.ServeMux {
 	lc.Append(fx.Hook{
 		OnStart: func(context.Context) error {
 			logger.Print("Starting HTTP server.")
-			go server.ListenAndServe()
+			go func() {
+				err := server.ListenAndServe()
+				if err != nil {
+
+				}
+			}()
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
@@ -41,14 +46,17 @@ func NewMux(lc fx.Lifecycle, logger service.Logger) *http.ServeMux {
 	return mux
 }
 
-func Register(mux *http.ServeMux, h http.Handler) {
+func Register(mux *http.ServeMux, h http.Handler, s *service.Services) {
 	mux.Handle("/", h)
+	s.Scheduler.ScheduleRecurrentTask("test", 2000, false, func(args ...interface{}) error {
+		return nil
+	}, "ficus", 1)
 }
 
 func StartApp() {
 	app := fx.New(
 		fx.Provide(
-			service.NewLoggerModule,
+			service.NewLogger,
 			config.NewConfigModule,
 			postgres.NewDbConnection,
 			repository.GetRepositories,

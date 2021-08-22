@@ -14,7 +14,7 @@ type Logger interface {
 	Printf(format string, args ...interface{})
 }
 
-func NewLoggerModule() Logger {
+func NewLogger() Logger {
 	logger := logrus.New()
 	logger.SetFormatter(&logrus.TextFormatter{
 		ForceColors:               true,
@@ -34,6 +34,6 @@ func NewLoggerModule() Logger {
 		CallerPrettyfier:          nil,
 	})
 	logger.SetOutput(os.Stdout)
-	logger.Info("Executing NewLoggerModule.")
+	logger.Info("Executing NewLogger.")
 	return logger
 }

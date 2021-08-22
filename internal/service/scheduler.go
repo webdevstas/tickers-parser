@@ -1,16 +1,14 @@
 package service
 
-type taskFunction func(args ...interface{}) (interface{}, error)
+import (
+	"time"
+)
 
-type taskParams struct {
-	name     string
-	function taskFunction
-	interval int
-	args     interface{}
-}
+type TaskFunction func(args ...interface{}) error
 
 type IScheduler interface {
-	runTask(name string, function taskFunction, args ...interface{}) interface{}
+	RunTask(name string, function TaskFunction, args ...interface{}) error
+	ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{})
 }
 
 type Scheduler struct {
@@ -18,14 +16,32 @@ type Scheduler struct {
 	IScheduler
 }
 
-func (s *Scheduler) RunTask(name string, function taskFunction, args ...interface{}) (interface{}, error) {
-	s.logger.Info("Run task: " + name)
-	res, err := function(args)
+func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) error {
+	err := function(args...)
 	if err != nil {
 		s.logger.Error(err)
-		return nil, err
+		return err
 	}
-	return res, nil
+	return nil
+}
+
+func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{}) {
+	t := time.NewTicker(time.Duration(intervalMs) * time.Millisecond)
+	if !ignoreFirstRun {
+		err := s.RunTask(name, function, args...)
+		if err != nil {
+			s.logger.Error(err)
+		}
+	}
+	for tickerTime := range t.C {
+		s.logger.Info("[scheduler/" + name + "] Task started in: " + tickerTime.Format("2006-01-02 15:04:05"))
+		go func() {
+			err := s.RunTask(name, function, args...)
+			if err != nil {
+				s.logger.Error(err)
+			}
+		}()
+	}
 }
 
 func NewScheduler(l Logger) *Scheduler {
