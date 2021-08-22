@@ -9,8 +9,8 @@ type Monitoring struct {
 	port int
 }
 
-func NewMonitoringModule(logger Logger, config viper.Viper) Monitoring {
+func NewMonitoring(logger Logger, config viper.Viper) *Monitoring {
 	mon := Monitoring{url: "localhost", port: 4533}
 	logger.Info("Config: $v", config.Get("url"))
-	return mon
+	return &mon
 }

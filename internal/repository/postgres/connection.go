@@ -17,7 +17,8 @@ type DbConf struct {
 }
 
 func NewDbConnection(config *viper.Viper, logger service.Logger) (*sqlx.DB, error) {
-	var conf = DbConf{
+
+	var conf = &DbConf{
 		host:     config.GetString("postgres.url"),
 		port:     config.GetString("postgres.port"),
 		user:     config.GetString("postgres.user"),
@@ -37,7 +38,9 @@ func NewDbConnection(config *viper.Viper, logger service.Logger) (*sqlx.DB, erro
 	err := db.Ping()
 
 	if err != nil {
-		logger.Error("Error to connect DB")
+		logger.Errorf("Error to connect DB: %v", err)
 	}
+
+	logger.Info("Connection with Postgress succeed")
 	return db, nil
 }

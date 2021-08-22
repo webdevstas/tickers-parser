@@ -28,7 +28,7 @@ func (s *Scheduler) RunTask(name string, function taskFunction, args ...interfac
 	return res, nil
 }
 
-func NewSchedulerModule(l Logger) *Scheduler {
+func NewScheduler(l Logger) *Scheduler {
 	s := Scheduler{logger: l}
 	return &s
 }
