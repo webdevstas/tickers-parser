@@ -48,9 +48,6 @@ func NewMux(lc fx.Lifecycle, logger service.Logger) *http.ServeMux {
 
 func Register(mux *http.ServeMux, h http.Handler, s *service.Services) {
 	mux.Handle("/", h)
-	s.Scheduler.ScheduleRecurrentTask("test", 2000, false, func(args ...interface{}) error {
-		return nil
-	}, "ficus", 1)
 }
 
 func StartApp() {
