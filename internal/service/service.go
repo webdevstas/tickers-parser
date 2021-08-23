@@ -2,19 +2,23 @@ package service
 
 import (
 	"github.com/spf13/viper"
+	"tickers-parser/internal/entities"
 	"tickers-parser/internal/service/updater/exchange"
 )
 
 type Services struct {
 	Scheduler  *Scheduler
 	Monitoring *Monitoring
-	Exchanges  *exchange.Exchanges
+	Exchanges  []entities.Exchange
+	Tasks      *Tasks
 }
 
 func GetServices(l Logger, c *viper.Viper) *Services {
+	scheduler := NewScheduler(l)
 	return &Services{
-		Scheduler:  NewScheduler(l),
+		Scheduler:  scheduler,
 		Monitoring: NewMonitoring(l, c),
 		Exchanges:  exchange.GetExchangesForTickersUpdate(),
+		Tasks:      TasksService(scheduler),
 	}
 }

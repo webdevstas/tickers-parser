@@ -48,6 +48,7 @@ func NewMux(lc fx.Lifecycle, logger service.Logger) *http.ServeMux {
 
 func Register(mux *http.ServeMux, h http.Handler, s *service.Services) {
 	mux.Handle("/", h)
+	s.Tasks.RunTasks()
 }
 
 func StartApp() {
