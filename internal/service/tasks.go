@@ -1,6 +1,7 @@
 package service
 
 import (
+	"fmt"
 	"tickers-parser/internal/service/updater/exchange"
 )
 
@@ -19,9 +20,14 @@ func (t *Tasks) RunTasks() {
 
 func startTickersParsing(args ...interface{}) error {
 	exchanges := exchange.GetExchangesForTickersUpdate()
+	tickersChan := make(chan interface{}, 5)
 
 	for _, ex := range exchanges {
-		ex.FetchTickers()
+		go ex.FetchTickers(tickersChan)
+	}
+
+	for ticker := range tickersChan {
+		fmt.Print(ticker)
 	}
 
 	return nil

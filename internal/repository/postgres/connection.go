@@ -3,7 +3,6 @@ package postgres
 import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
-	_ "github.com/lib/pq"
 	"github.com/spf13/viper"
 	"tickers-parser/internal/service"
 )
@@ -16,9 +15,9 @@ type DbConf struct {
 	password string
 }
 
-func NewDbConnection(config *viper.Viper, logger service.Logger) (*sqlx.DB, error) {
+func ConnectToPostgres(config *viper.Viper, logger service.Logger) (*sqlx.DB, error) {
 
-	var conf = &DbConf{
+	var conf = DbConf{
 		host:     config.GetString("postgres.url"),
 		port:     config.GetString("postgres.port"),
 		user:     config.GetString("postgres.user"),
@@ -28,14 +27,14 @@ func NewDbConnection(config *viper.Viper, logger service.Logger) (*sqlx.DB, erro
 
 	var db *sqlx.DB
 
-	db, error := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", conf.host, conf.port, conf.user, conf.dbname, conf.password))
+	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", conf.host, conf.port, conf.user, conf.dbname, conf.password))
 
-	if error != nil {
-		logger.Error(error)
+	if err != nil {
+		logger.Error(err)
 	}
 
 	// force a connection and test that it worked
-	err := db.Ping()
+	err = db.Ping()
 
 	if err != nil {
 		logger.Errorf("Error to connect DB: %v", err)

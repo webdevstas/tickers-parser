@@ -44,7 +44,7 @@ func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFir
 	}
 }
 
-func NewScheduler(l Logger) *Scheduler {
+func InitScheduler(l Logger) *Scheduler {
 	s := Scheduler{logger: l}
 	return &s
 }

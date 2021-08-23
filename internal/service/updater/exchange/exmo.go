@@ -17,15 +17,15 @@ func ExmoExchange() entities.Exchange {
 	return exmo
 }
 
-func FetchTickers() []entities.Ticker {
+func FetchTickers(channel chan<- interface{}) {
 	apiUrl := "https://api.exmo.com/v1/ticker"
 	resp, _ := http.Get(apiUrl)
 
 	body, err := ioutil.ReadAll(resp.Body)
+
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	log.Println(string(body))
-	return nil
+	channel <- body
 }

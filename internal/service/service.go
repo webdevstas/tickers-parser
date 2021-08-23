@@ -14,7 +14,7 @@ type Services struct {
 }
 
 func GetServices(l Logger, c *viper.Viper) *Services {
-	scheduler := NewScheduler(l)
+	scheduler := InitScheduler(l)
 	return &Services{
 		Scheduler:  scheduler,
 		Monitoring: NewMonitoring(l, c),
