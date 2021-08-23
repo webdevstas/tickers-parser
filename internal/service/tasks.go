@@ -1,7 +1,6 @@
 package service
 
 import (
-	"fmt"
 	"tickers-parser/internal/service/updater/exchange"
 )
 
@@ -15,14 +14,14 @@ type Tasks struct {
 }
 
 func (t *Tasks) RunTasks() {
-	t.s.ScheduleRecurrentTask("tickers", 60*60*1000, true, startTickersParsing)
+	t.s.ScheduleRecurrentTask("tickers", 60*1000, true, startTickersParsing)
 }
 
 func startTickersParsing(args ...interface{}) error {
 	exchanges := exchange.GetExchangesForTickersUpdate()
 
-	for ex := range exchanges {
-		fmt.Print(ex)
+	for _, ex := range exchanges {
+		ex.FetchTickers()
 	}
 
 	return nil

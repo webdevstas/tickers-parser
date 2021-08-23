@@ -12,12 +12,12 @@ func ExmoExchange() entities.Exchange {
 		Key:          "exmo",
 		Name:         "Exmo",
 		Enabled:      true,
-		FetchTickers: fetchTickers,
+		FetchTickers: FetchTickers,
 	}
 	return exmo
 }
 
-func fetchTickers() []entities.Ticker {
+func FetchTickers() []entities.Ticker {
 	apiUrl := "https://api.exmo.com/v1/ticker"
 	resp, _ := http.Get(apiUrl)
 
