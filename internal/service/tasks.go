@@ -1,7 +1,7 @@
 package service
 
 import (
-	"fmt"
+	"tickers-parser/internal/entities"
 	"tickers-parser/internal/service/updater/exchange"
 )
 
@@ -10,32 +10,41 @@ type ITasks interface {
 }
 
 type Tasks struct {
-	s *Scheduler
+	scheduler *Scheduler
+	log       Logger
 	ITasks
 }
 
 func (t *Tasks) RunTasks() {
-	t.s.ScheduleRecurrentTask("tickers", 60*1000, true, startTickersParsing)
+	t.scheduler.ScheduleRecurrentTask("tickers", 60*1000, true, t.startTickersParsing)
 }
 
-func startTickersParsing(args ...interface{}) error {
+func (t *Tasks) startTickersParsing(args ...interface{}) error {
 	exchanges := exchange.GetExchangesForTickersUpdate()
 	tickersChan := make(chan interface{}, 5)
+	cancelChan := make(chan struct{})
+	var curExchange entities.Exchange
 
 	for _, ex := range exchanges {
-		go ex.FetchTickers(tickersChan)
+		curExchange = ex
+		go ex.FetchTickers(tickersChan, cancelChan)
 	}
 
-	for ticker := range tickersChan {
-		fmt.Print(ticker)
+	for {
+		select {
+		case <-cancelChan:
+			t.log.Error("Error to parse tickers for exchange: " + curExchange.Name)
+			return nil
+		case tickers := <-tickersChan:
+			t.log.Info(tickers)
+		}
 	}
-
-	return nil
 }
 
-func TasksService(s *Scheduler) *Tasks {
+func TasksService(s *Scheduler, l Logger) *Tasks {
 	t := Tasks{
-		s: s,
+		scheduler: s,
+		log:       l,
 	}
 	return &t
 }

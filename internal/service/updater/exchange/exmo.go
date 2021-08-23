@@ -2,7 +2,6 @@ package exchange
 
 import (
 	"io/ioutil"
-	"log"
 	"net/http"
 	"tickers-parser/internal/entities"
 )
@@ -17,15 +16,19 @@ func ExmoExchange() entities.Exchange {
 	return exmo
 }
 
-func FetchTickers(channel chan<- interface{}) {
+func FetchTickers(dataChannel chan<- interface{}, cancelChannel chan struct{}) {
 	apiUrl := "https://api.exmo.com/v1/ticker"
-	resp, _ := http.Get(apiUrl)
+	resp, err := http.Get(apiUrl)
+
+	if err != nil {
+		cancelChannel <- struct{}{}
+	}
 
 	body, err := ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		log.Fatalln(err)
+		cancelChannel <- struct{}{}
 	}
 
-	channel <- body
+	dataChannel <- body
 }
