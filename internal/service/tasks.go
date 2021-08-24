@@ -21,7 +21,7 @@ func (t *Tasks) RunTasks() {
 
 func (t *Tasks) startTickersParsing(args ...interface{}) error {
 	exchanges := exchange.GetExchangesForTickersUpdate()
-	tickersChan := make(chan []entities.Ticker, 5)
+	tickersChan := make(chan map[string]entities.ExchangeTickers, 5)
 	cancelChan := make(chan struct{})
 	var curExchange entities.Exchange
 
@@ -33,10 +33,10 @@ func (t *Tasks) startTickersParsing(args ...interface{}) error {
 	for {
 		select {
 		case <-cancelChan:
-			t.log.Error("Error to parse tickers for exchange: " + curExchange.Name)
+			t.log.Error("Error to parse tickers for exchange: " + curExchange.Name) //TODO: Сделать возврат ошибки и имени биржи из канала cancelChan
 			return nil
 		case tickers := <-tickersChan:
-			t.log.Info(tickers)
+			t.log.Info(tickers) //TODO: Реализовать сервис сохранялку
 		}
 	}
 }

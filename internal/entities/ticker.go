@@ -20,3 +20,8 @@ type Ticker struct {
 	QuoteAddress string  `json:"quoteAddress" db:"quoteAddress"`
 	Enabled      bool    `json:"enabled" db:"enabled"`
 }
+
+type ExchangeTickers struct {
+	Timestamp int64
+	Tickers   []Ticker
+}

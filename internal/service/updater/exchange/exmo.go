@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
+	"time"
 )
 
 type exmoTicker struct {
@@ -31,8 +32,8 @@ func ExmoExchange() entities.Exchange {
 	return exmo
 }
 
-func fetchTickers(dataChannel chan<- []entities.Ticker, cancelChannel chan struct{}) {
-	var tickers []entities.Ticker
+func fetchTickers(dataChannel chan<- map[string]entities.ExchangeTickers, cancelChannel chan struct{}) {
+	var tickersArr []entities.Ticker
 	apiUrl := "https://api.exmo.com/v1/ticker"
 	rawTickers := make(map[string]exmoTicker)
 	resp, fetchErr := http.Get(apiUrl)
@@ -58,9 +59,15 @@ func fetchTickers(dataChannel chan<- []entities.Ticker, cancelChannel chan struc
 			Ask:         ask,
 			High:        high,
 			Low:         low,
+			UpdatedAt:   val.Updated,
 		}
-		tickers = append(tickers, ticker)
+		tickersArr = append(tickersArr, ticker)
+	}
+	exchangeTickers := make(map[string]entities.ExchangeTickers)
+	exchangeTickers["exmo"] = entities.ExchangeTickers{
+		Timestamp: time.Now().Unix(),
+		Tickers:   tickersArr,
 	}
 
-	dataChannel <- tickers
+	dataChannel <- exchangeTickers
 }
