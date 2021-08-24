@@ -21,7 +21,7 @@ func (t *Tasks) RunTasks() {
 
 func (t *Tasks) startTickersParsing(args ...interface{}) error {
 	exchanges := exchange.GetExchangesForTickersUpdate()
-	tickersChan := make(chan interface{}, 5)
+	tickersChan := make(chan []entities.Ticker, 5)
 	cancelChan := make(chan struct{})
 	var curExchange entities.Exchange
 
