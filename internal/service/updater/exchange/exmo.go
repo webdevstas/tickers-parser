@@ -1,12 +1,10 @@
 package exchange
 
 import (
-	"encoding/json"
-	"io/ioutil"
-	"net/http"
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
+	"tickers-parser/internal/utils"
 	"time"
 )
 
@@ -32,16 +30,15 @@ func ExmoExchange() entities.Exchange {
 	return exmo
 }
 
-func fetchTickers(dataChannel chan<- map[string]entities.ExchangeTickers, cancelChannel chan struct{}) {
+func fetchTickers(dataChannel chan<- map[string]entities.ExchangeTickers, cancelChannel chan<- error) {
 	var tickersArr []entities.Ticker
 	apiUrl := "https://api.exmo.com/v1/ticker"
 	rawTickers := make(map[string]exmoTicker)
-	resp, fetchErr := http.Get(apiUrl)
-	body, readBodyErr := ioutil.ReadAll(resp.Body)
-	unmarshalErr := json.Unmarshal(body, &rawTickers)
+	err := utils.FetchJson(apiUrl, &rawTickers)
 
-	if fetchErr != nil || readBodyErr != nil || unmarshalErr != nil {
-		cancelChannel <- struct{}{}
+	if err != nil {
+		cancelChannel <- err
+		return
 	}
 
 	for key, val := range rawTickers {
