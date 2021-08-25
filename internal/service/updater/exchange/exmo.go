@@ -30,7 +30,7 @@ func ExmoExchange() entities.Exchange {
 	return exmo
 }
 
-func fetchTickers(dataChannel chan<- map[string]entities.ExchangeTickers, cancelChannel chan<- error) {
+func fetchTickers(dataChannel chan<- entities.ExchangeTickers, cancelChannel chan<- error) {
 	var tickersArr []entities.Ticker
 	apiUrl := "https://api.exmo.com/v1/ticker"
 	rawTickers := make(map[string]exmoTicker)
@@ -60,11 +60,11 @@ func fetchTickers(dataChannel chan<- map[string]entities.ExchangeTickers, cancel
 		}
 		tickersArr = append(tickersArr, ticker)
 	}
-	exchangeTickers := make(map[string]entities.ExchangeTickers)
-	exchangeTickers["exmo"] = entities.ExchangeTickers{
+	res := entities.ExchangeTickers{
+		Exchange:  "exmo",
 		Timestamp: time.Now().Unix(),
 		Tickers:   tickersArr,
 	}
 
-	dataChannel <- exchangeTickers
+	dataChannel <- res
 }

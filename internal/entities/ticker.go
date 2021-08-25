@@ -22,6 +22,7 @@ type Ticker struct {
 }
 
 type ExchangeTickers struct {
+	Exchange  string
 	Timestamp int64
 	Tickers   []Ticker
 }
