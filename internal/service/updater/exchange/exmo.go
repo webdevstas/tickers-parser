@@ -4,6 +4,7 @@ import (
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
+	"tickers-parser/internal/types"
 	"tickers-parser/internal/utils"
 	"time"
 )
@@ -30,14 +31,14 @@ func ExmoExchange() entities.Exchange {
 	return exmo
 }
 
-func fetchTickers(dataChannel chan<- entities.ExchangeTickers, cancelChannel chan<- error) {
+func fetchTickers(channels types.ChannelsPair) {
 	var tickersArr []entities.Ticker
 	apiUrl := "https://api.exmo.com/v1/ticker"
 	rawTickers := make(map[string]exmoTicker)
 	err := utils.FetchJson(apiUrl, &rawTickers)
 
 	if err != nil {
-		cancelChannel <- err
+		channels.CancelChannel <- err
 		return
 	}
 
@@ -66,5 +67,5 @@ func fetchTickers(dataChannel chan<- entities.ExchangeTickers, cancelChannel cha
 		Tickers:   tickersArr,
 	}
 
-	dataChannel <- res
+	channels.DataChannel <- res
 }

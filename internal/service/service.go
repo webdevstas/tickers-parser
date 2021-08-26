@@ -17,7 +17,7 @@ type Services struct {
 
 func GetServices(l Logger, c *viper.Viper) *Services {
 	scheduler := InitScheduler(l)
-	fileSaver := storage.NewFileSaver("./")
+	fileSaver := storage.NewFileSaver(c.GetString("app.dataRoot"))
 	storageService := storage.NewStorageService(fileSaver)
 	return &Services{
 		Scheduler:  scheduler,

@@ -4,6 +4,7 @@ import (
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/service/storage"
 	"tickers-parser/internal/service/updater/exchange"
+	"tickers-parser/internal/types"
 )
 
 type ITasks interface {
@@ -23,22 +24,27 @@ func (t *Tasks) RunTasks() {
 
 func (t *Tasks) startTickersParsing(args ...interface{}) {
 	exchanges := exchange.GetExchangesForTickersUpdate()
-	tickersChan := make(chan entities.ExchangeTickers, 5)
+	tickersChan := make(chan interface{}, 5)
 	cancelChan := make(chan error)
+	tickersChannels := types.ChannelsPair{
+		DataChannel:   tickersChan,
+		CancelChannel: cancelChan,
+	}
 
 	for _, ex := range exchanges {
-		go ex.FetchTickers(tickersChan, cancelChan)
+		go ex.FetchTickers(tickersChannels)
 	}
 
 	for {
 		select {
 		case err := <-cancelChan:
 			t.log.Error(err)
-		case tickers := <-tickersChan:
-			err := t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers)
-			if err != nil {
-				t.log.Error(err)
+		case result := <-tickersChan:
+			saveChannels := types.ChannelsPair{
+				CancelChannel: make(chan error),
 			}
+			tickers := result.(entities.ExchangeTickers)
+			go t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers, saveChannels)
 		}
 	}
 }

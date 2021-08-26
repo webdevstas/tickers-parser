@@ -4,3 +4,5 @@ postgres:
   user: 'postgres'
   password: '260789'
   database: 'tickers'
+app:
+  dataRoot: 'data'
