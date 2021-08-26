@@ -6,3 +6,4 @@ postgres:
   database: 'tickers'
 app:
   dataRoot: 'data'
+  tickersInterval: 5 #min

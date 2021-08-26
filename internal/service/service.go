@@ -23,7 +23,7 @@ func GetServices(l Logger, c *viper.Viper) *Services {
 		Scheduler:  scheduler,
 		Monitoring: NewMonitoringService(l, c),
 		Exchanges:  exchange.GetExchangesForTickersUpdate(),
-		Tasks:      NewTasksService(scheduler, l, storageService),
+		Tasks:      NewTasksService(scheduler, l, storageService, c),
 		Storage:    storageService,
 	}
 }

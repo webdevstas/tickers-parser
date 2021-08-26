@@ -1,6 +1,7 @@
 package service
 
 import (
+	"github.com/spf13/viper"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/service/storage"
 	"tickers-parser/internal/service/updater/exchange"
@@ -15,11 +16,12 @@ type Tasks struct {
 	scheduler *Scheduler
 	log       Logger
 	storage   *storage.Storage
+	config    *viper.Viper
 	ITasks
 }
 
 func (t *Tasks) RunTasks() {
-	t.scheduler.ScheduleRecurrentTask("tickers", 60*1000, true, t.startTickersParsing)
+	t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, true, t.startTickersParsing)
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) {
@@ -49,11 +51,12 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 	}
 }
 
-func NewTasksService(s *Scheduler, l Logger, st *storage.Storage) *Tasks {
+func NewTasksService(s *Scheduler, l Logger, st *storage.Storage, c *viper.Viper) *Tasks {
 	t := Tasks{
 		scheduler: s,
 		log:       l,
 		storage:   st,
+		config:    c,
 	}
 	return &t
 }
