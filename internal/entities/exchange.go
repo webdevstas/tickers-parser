@@ -9,3 +9,9 @@ type Exchange struct {
 	Enabled      bool                              `json:"enabled,omitempty" db:"enabled"`
 	FetchTickers func(channels types.ChannelsPair) `json:"fetchTickers,omitempty" db:"fetchTickers"`
 }
+
+type ExchangeTickers struct {
+	Exchange  string
+	Timestamp int64
+	Tickers   []Ticker
+}

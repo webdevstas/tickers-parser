@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/sirupsen/logrus"
 	"os"
+	"time"
 )
 
 type Logger interface {
@@ -23,8 +24,8 @@ func NewLogger() Logger {
 		DisableQuote:              false,
 		EnvironmentOverrideColors: false,
 		DisableTimestamp:          false,
-		FullTimestamp:             false,
-		TimestampFormat:           "",
+		FullTimestamp:             true,
+		TimestampFormat:           time.RFC822,
 		DisableSorting:            false,
 		SortingFunc:               nil,
 		DisableLevelTruncation:    false,

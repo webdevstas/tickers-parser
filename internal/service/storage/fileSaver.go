@@ -46,10 +46,12 @@ func (fs *FileSaver) Save(name string, timestamp int64, data interface{}, channe
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		cancelChan <- err
+		file.Close()
 	}
 	_, err = file.Write(jsonData)
 	if err != nil {
 		cancelChan <- err
+		file.Close()
 	}
 	file.Close()
 	os.Chdir("../../")
