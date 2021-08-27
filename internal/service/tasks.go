@@ -45,6 +45,10 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 			}
 			tickers := result.(entities.ExchangeTickers)
 			go t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers, saveChannels)
+			select {
+			case err := <-saveChannels.CancelChannel:
+				t.log.Error(err)
+			}
 		}
 	}
 }
