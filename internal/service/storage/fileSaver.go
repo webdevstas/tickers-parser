@@ -14,6 +14,7 @@ type FileSaver struct {
 
 func (fs *FileSaver) Save(name string, timestamp int64, data interface{}, channels types.ChannelsPair) {
 	cancelChan := channels.CancelChannel
+	dataChan := channels.DataChannel
 	wd, err := os.Getwd()
 	if err != nil {
 		cancelChan <- err
@@ -65,6 +66,7 @@ func (fs *FileSaver) Save(name string, timestamp int64, data interface{}, channe
 	}
 	file.Close()
 	os.Chdir("../../")
+	dataChan <- true
 }
 
 func NewFileSaver(rootPath string) *FileSaver {
