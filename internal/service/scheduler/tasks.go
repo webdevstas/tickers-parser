@@ -1,9 +1,10 @@
-package service
+package scheduler
 
 import (
 	"github.com/spf13/viper"
 	"runtime"
 	"tickers-parser/internal/entities"
+	"tickers-parser/internal/service/logger"
 	"tickers-parser/internal/service/storage"
 	"tickers-parser/internal/service/updater/exchange"
 	"tickers-parser/internal/types"
@@ -15,7 +16,7 @@ type ITasks interface {
 
 type Tasks struct {
 	scheduler *Scheduler
-	log       Logger
+	log       logger.Logger
 	storage   *storage.Storage
 	config    *viper.Viper
 	ITasks
@@ -62,9 +63,9 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 	close(saveChannels.DataChannel)
 }
 
-func NewTasksService(s *Scheduler, l Logger, st *storage.Storage, c *viper.Viper) *Tasks {
+func NewTasksService(l logger.Logger, st *storage.Storage, c *viper.Viper) *Tasks {
 	t := Tasks{
-		scheduler: s,
+		scheduler: InitScheduler(l),
 		log:       l,
 		storage:   st,
 		config:    c,

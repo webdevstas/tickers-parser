@@ -8,6 +8,7 @@ import (
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/repository/postgres"
 	"tickers-parser/internal/service"
+	"tickers-parser/internal/service/logger"
 )
 
 func Register(s *service.Services) {
@@ -17,7 +18,7 @@ func Register(s *service.Services) {
 func StartApp() {
 	app := fx.New(
 		fx.Provide(
-			service.NewLogger,
+			logger.NewLogger,
 			config.NewConfigModule,
 			postgres.ConnectToPostgres,
 			repository.GetRepositories,

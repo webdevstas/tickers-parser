@@ -3,12 +3,12 @@ package repository
 import (
 	"github.com/jmoiron/sqlx"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/service"
+	"tickers-parser/internal/service/logger"
 )
 
 type TickerRepository struct {
 	db     *sqlx.DB
-	logger service.Logger
+	logger logger.Logger
 }
 
 func (r *TickerRepository) GetTickers(cond string) ([]entities.Ticker, error) {
@@ -30,6 +30,6 @@ func (r *TickerRepository) GetTickers(cond string) ([]entities.Ticker, error) {
 	return tickers, nil
 }
 
-func GetTickerRepository(db *sqlx.DB, logger service.Logger) *TickerRepository {
+func GetTickerRepository(db *sqlx.DB, logger logger.Logger) *TickerRepository {
 	return &TickerRepository{db: db, logger: logger}
 }

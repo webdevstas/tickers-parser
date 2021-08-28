@@ -1,6 +1,7 @@
-package service
+package scheduler
 
 import (
+	"tickers-parser/internal/service/logger"
 	"time"
 )
 
@@ -12,12 +13,14 @@ type IScheduler interface {
 }
 
 type Scheduler struct {
-	logger Logger
+	logger logger.Logger
 	IScheduler
 }
 
 func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) {
+	s.logger.Info("[scheduler/" + name + "] Task started.")
 	function(args...)
+	s.logger.Info("[scheduler/" + name + "] Task ended.")
 }
 
 func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{}) {
@@ -26,12 +29,10 @@ func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFir
 		go s.RunTask(name, function, args...)
 	}
 	for _ = range t.C {
-		s.logger.Info("[scheduler/" + name + "] Task started.")
 		go s.RunTask(name, function, args...)
 	}
 }
 
-func InitScheduler(l Logger) *Scheduler {
-	s := Scheduler{logger: l}
-	return &s
+func InitScheduler(l logger.Logger) *Scheduler {
+	return &Scheduler{logger: l}
 }

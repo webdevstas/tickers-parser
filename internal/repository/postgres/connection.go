@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
-	"tickers-parser/internal/service"
+	"tickers-parser/internal/service/logger"
 )
 
 type DbConf struct {
@@ -15,7 +15,7 @@ type DbConf struct {
 	password string
 }
 
-func ConnectToPostgres(config *viper.Viper, logger service.Logger) (*sqlx.DB, error) {
+func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*sqlx.DB, error) {
 
 	var conf = DbConf{
 		host:     config.GetString("postgres.url"),
