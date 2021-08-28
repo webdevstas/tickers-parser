@@ -4,8 +4,8 @@ import (
 	"tickers-parser/internal/entities"
 )
 
-func GetExchangesForTickersUpdate() []entities.Exchange {
-	var exchanges []entities.Exchange
-	exchanges = append(exchanges, ExmoExchange())
-	return exchanges
+const ExchangesCount = 2
+
+func GetExchangesForTickersUpdate() [ExchangesCount]entities.Exchange {
+	return [ExchangesCount]entities.Exchange{Allbit, Exmo}
 }

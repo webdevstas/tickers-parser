@@ -10,7 +10,7 @@ import (
 type Services struct {
 	Scheduler  *Scheduler
 	Monitoring *Monitoring
-	Exchanges  []entities.Exchange
+	Exchanges  [exchange.ExchangesCount]entities.Exchange
 	Tasks      *Tasks
 	Storage    *storage.Storage
 }

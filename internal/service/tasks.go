@@ -2,6 +2,7 @@ package service
 
 import (
 	"github.com/spf13/viper"
+	"runtime"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/service/storage"
 	"tickers-parser/internal/service/updater/exchange"
@@ -27,12 +28,15 @@ func (t *Tasks) RunTasks() {
 func (t *Tasks) startTickersParsing(args ...interface{}) {
 	exchanges := exchange.GetExchangesForTickersUpdate()
 	tickersChannels := types.ChannelsPair{
-		DataChannel:   make(chan interface{}, 5),
+		DataChannel:   make(chan interface{}, exchange.ExchangesCount),
+		CancelChannel: make(chan error),
+	}
+	saveChannels := types.ChannelsPair{
 		CancelChannel: make(chan error),
 	}
 
 	for _, ex := range exchanges {
-		go ex.FetchTickers(tickersChannels)
+		go ex.FetchTickers(&tickersChannels)
 	}
 
 	for {
@@ -40,15 +44,11 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 		case err := <-tickersChannels.CancelChannel:
 			t.log.Error(err)
 		case result := <-tickersChannels.DataChannel:
-			saveChannels := types.ChannelsPair{
-				CancelChannel: make(chan error),
-			}
 			tickers := result.(entities.ExchangeTickers)
 			go t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers, saveChannels)
-			select {
-			case err := <-saveChannels.CancelChannel:
-				t.log.Error(err)
-			}
+			runtime.Gosched()
+			err := <-saveChannels.CancelChannel
+			t.log.Error(err)
 		}
 	}
 }
