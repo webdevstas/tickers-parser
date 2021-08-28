@@ -29,17 +29,17 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 	exchanges := exchange.GetExchangesForTickersUpdate()
 	tickersChannels := types.ChannelsPair{
 		DataChannel:   make(chan interface{}, exchange.ExchangesCount),
-		CancelChannel: make(chan error),
+		CancelChannel: make(chan error, exchange.ExchangesCount),
 	}
 	saveChannels := types.ChannelsPair{
-		CancelChannel: make(chan error),
+		CancelChannel: make(chan error, exchange.ExchangesCount),
 	}
 
 	for _, ex := range exchanges {
 		go ex.FetchTickers(&tickersChannels)
 	}
 
-	for {
+	for i := 0; i <= exchange.ExchangesCount; i++ {
 		select {
 		case err := <-tickersChannels.CancelChannel:
 			t.log.Error(err)
@@ -47,10 +47,17 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 			tickers := result.(entities.ExchangeTickers)
 			go t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers, saveChannels)
 			runtime.Gosched()
-			err := <-saveChannels.CancelChannel
-			t.log.Error(err)
+			select {
+			case err := <-saveChannels.CancelChannel:
+				t.log.Error(err)
+			default:
+				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange)
+			}
 		}
 	}
+	close(tickersChannels.DataChannel)
+	close(tickersChannels.CancelChannel)
+	close(saveChannels.CancelChannel)
 }
 
 func NewTasksService(s *Scheduler, l Logger, st *storage.Storage, c *viper.Viper) *Tasks {
