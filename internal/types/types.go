@@ -1,7 +1,5 @@
 package types
 
-import "fmt"
-
 type ChannelsPair struct {
 	DataChannel   chan interface{}
 	CancelChannel chan error
@@ -10,5 +8,4 @@ type ChannelsPair struct {
 func (pair ChannelsPair) CloseAll() {
 	close(pair.CancelChannel)
 	close(pair.DataChannel)
-	fmt.Println("Channels closed")
 }

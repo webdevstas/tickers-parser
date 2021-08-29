@@ -26,10 +26,10 @@ func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interfac
 func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{}) {
 	t := time.NewTicker(time.Duration(intervalMs) * time.Millisecond)
 	if !ignoreFirstRun {
-		go s.RunTask(name, function, args...)
+		s.RunTask(name, function, args...)
 	}
 	for _ = range t.C {
-		go s.RunTask(name, function, args...)
+		s.RunTask(name, function, args...)
 	}
 }
 
