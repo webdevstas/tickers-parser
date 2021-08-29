@@ -23,7 +23,7 @@ type Tasks struct {
 }
 
 func (t *Tasks) RunTasks() {
-	t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, true, t.startTickersParsing)
+	t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, false, t.startTickersParsing)
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) {
@@ -59,6 +59,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 	}
 	tickersChannels.CloseAll()
 	saveChannels.CloseAll()
+	t.log.Info("[scheduler/tickers] All channels closed")
 }
 
 func NewTasksService(l logger.Logger, st *storage.Storage, c *viper.Viper) *Tasks {

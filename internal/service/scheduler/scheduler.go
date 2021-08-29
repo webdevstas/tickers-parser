@@ -18,9 +18,9 @@ type Scheduler struct {
 }
 
 func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) {
-	s.logger.Info("[scheduler/" + name + "] Task started.")
+	s.logger.Info("[scheduler/" + name + "] Task started")
 	function(args...)
-	s.logger.Info("[scheduler/" + name + "] Task ended.")
+	s.logger.Info("[scheduler/" + name + "] Task ended")
 }
 
 func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{}) {
