@@ -35,6 +35,5 @@ func NewLogger() Logger {
 		CallerPrettyfier:          nil,
 	})
 	logger.SetOutput(os.Stdout)
-	logger.Info("Executing NewLogger.")
 	return logger
 }

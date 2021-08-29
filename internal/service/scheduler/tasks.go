@@ -2,7 +2,6 @@ package scheduler
 
 import (
 	"github.com/spf13/viper"
-	"runtime"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/service/logger"
 	"tickers-parser/internal/service/storage"
@@ -48,7 +47,6 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 		case result := <-tickersChannels.DataChannel:
 			tickers := result.(entities.ExchangeTickers)
 			go t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers, saveChannels)
-			runtime.Gosched()
 			select {
 			case err := <-saveChannels.CancelChannel:
 				t.log.Error(err)
@@ -57,10 +55,9 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 			}
 		}
 	}
-	close(tickersChannels.DataChannel)
-	close(tickersChannels.CancelChannel)
-	close(saveChannels.CancelChannel)
-	close(saveChannels.DataChannel)
+	tickersChannels.CloseAll()
+	saveChannels.CloseAll()
+	t.log.Info("Channels closed")
 }
 
 func NewTasksService(l logger.Logger, st *storage.Storage, c *viper.Viper) *Tasks {

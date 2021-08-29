@@ -18,11 +18,11 @@ type Services struct {
 
 func GetServices(l logger.Logger, c *viper.Viper) *Services {
 	fileSaver := storage.NewFileSaver(c.GetString("app.dataRoot"))
-	storageService := storage.NewStorageService(fileSaver)
+	fileStorageService := storage.NewStorageService(fileSaver)
 	return &Services{
 		Monitoring: NewMonitoringService(l, c),
 		Exchanges:  exchange.GetExchangesForTickersUpdate(),
-		Tasks:      scheduler.NewTasksService(l, storageService, c),
-		Storage:    storageService,
+		Tasks:      scheduler.NewTasksService(l, fileStorageService, c),
+		Storage:    fileStorageService,
 	}
 }
