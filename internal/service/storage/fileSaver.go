@@ -5,7 +5,6 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
-	"tickers-parser/internal/types"
 )
 
 type FileSaver struct {
@@ -13,9 +12,7 @@ type FileSaver struct {
 	rootPath string
 }
 
-func (fs *FileSaver) Save(name string, timestamp int64, data interface{}, channels types.ChannelsPair) {
-	cancelChan := channels.CancelChannel
-	dataChan := channels.DataChannel
+func (fs *FileSaver) Save(name string, timestamp int64, data interface{}) (bool, error) {
 	dataRoot := filepath.FromSlash(fs.workDir + "/" + fs.rootPath + "/")
 	err := os.Chdir(dataRoot + name)
 	if err != nil {
@@ -28,33 +25,31 @@ func (fs *FileSaver) Save(name string, timestamp int64, data interface{}, channe
 		err = nil
 		err = os.Mkdir(name, 0777)
 		if err != nil {
-			cancelChan <- err
-			return
+			return false, err
 		}
 		err = nil
 		err = os.Chdir(dataRoot + name)
 		if err != nil {
-			cancelChan <- err
-			return
+			return false, err
 		}
 	}
 	file, err := os.Create(strconv.FormatInt(timestamp, 10) + ".json")
 	if err != nil {
-		cancelChan <- err
+		return false, err
 	}
 	defer file.Close()
 	jsonData, err := json.Marshal(data)
 	if err != nil {
 		file.Close()
-		cancelChan <- err
+		return false, err
 	}
 	_, err = file.Write(jsonData)
 	if err != nil {
 		file.Close()
-		cancelChan <- err
+		return false, err
 	}
 	file.Close()
-	dataChan <- true
+	return true, nil
 }
 
 func NewFileSaver(rootPath string) *FileSaver {

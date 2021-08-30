@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/types"
 	"tickers-parser/internal/utils"
 	"time"
 )
@@ -33,14 +32,13 @@ type ascendexResponse struct {
 	Data []ascendexTicker
 }
 
-func fetchTickers(channels *types.ChannelsPair) {
+func fetchTickers() (entities.ExchangeTickers, error) {
 	var tickersArr []entities.Ticker
 	apiUrl := "https://ascendex.com/api/pro/v1/ticker"
 	res := ascendexResponse{}
 	err := utils.FetchJson(apiUrl, &res)
 	if err != nil {
-		channels.CancelChannel <- err
-		return
+		return entities.ExchangeTickers{}, err
 	}
 	rawTickers := res.Data
 	for _, rawTicker := range rawTickers {
@@ -73,5 +71,5 @@ func fetchTickers(channels *types.ChannelsPair) {
 		Timestamp: time.Now().Unix(),
 		Tickers:   tickersArr,
 	}
-	channels.DataChannel <- result
+	return result, nil
 }

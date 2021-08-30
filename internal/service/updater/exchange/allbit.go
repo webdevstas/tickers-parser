@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/types"
 	"tickers-parser/internal/utils"
 	"time"
 )
@@ -35,14 +34,13 @@ type allbitTicker struct {
 	BaseVolume     string `json:"baseVolume,omitempty"`
 }
 
-func allbitFetchTickers(channels *types.ChannelsPair) {
+func allbitFetchTickers() (entities.ExchangeTickers, error) {
 	var tickersArr []entities.Ticker
 	apiUrl := "https://allbit.com/api/coin-market-cap-data/"
 	rawTickers := make(map[string]allbitTicker)
 	err := utils.FetchJson(apiUrl, &rawTickers)
 	if err != nil {
-		channels.CancelChannel <- err
-		return
+		return entities.ExchangeTickers{}, err
 	}
 
 	for pair, data := range rawTickers {
@@ -71,5 +69,5 @@ func allbitFetchTickers(channels *types.ChannelsPair) {
 		Timestamp: time.Now().Unix(),
 		Tickers:   tickersArr,
 	}
-	channels.DataChannel <- res
+	return res, nil
 }

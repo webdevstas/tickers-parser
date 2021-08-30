@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/types"
 	"tickers-parser/internal/utils"
 	"time"
 )
@@ -30,15 +29,14 @@ type exmoTicker struct {
 	Updated   int64  `json:"updated,omitempty"` //sec
 }
 
-func exmoFetchTickers(channels *types.ChannelsPair) {
+func exmoFetchTickers() (entities.ExchangeTickers, error) {
 	var tickersArr []entities.Ticker
 	apiUrl := "https://api.exmo.com/v1/ticker"
 	rawTickers := make(map[string]exmoTicker)
 	err := utils.FetchJson(apiUrl, &rawTickers)
 
 	if err != nil {
-		channels.CancelChannel <- err
-		return
+		return entities.ExchangeTickers{}, err
 	}
 
 	for pair, data := range rawTickers {
@@ -66,5 +64,5 @@ func exmoFetchTickers(channels *types.ChannelsPair) {
 		Tickers:   tickersArr,
 	}
 
-	channels.DataChannel <- res
+	return res, nil
 }
