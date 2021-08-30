@@ -26,7 +26,7 @@ func (t *Tasks) RunTasks() {
 	t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, false, t.startTickersParsing)
 }
 
-func (t *Tasks) startTickersParsing(args ...interface{}) {
+func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	exchanges := exchange.GetExchangesForTickersUpdate()
 	tickersChannels := types.ChannelsPair{
 		DataChannel:   make(chan interface{}, exchange.ExchangesCount),
@@ -51,7 +51,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 	for i := 0; i < exchange.ExchangesCount; i++ {
 		select {
 		case err := <-tickersChannels.CancelChannel:
-			t.log.Error(err)
+			return nil, err
 		case result := <-tickersChannels.DataChannel:
 			tickers := result.(entities.ExchangeTickers)
 			go func(channels types.ChannelsPair) {
@@ -64,7 +64,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 			}(saveChannels)
 			select {
 			case err := <-saveChannels.CancelChannel:
-				t.log.Error(err)
+				return nil, err
 			case <-saveChannels.DataChannel:
 				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange)
 				runtime.Gosched()
@@ -74,6 +74,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) {
 	tickersChannels.CloseAll()
 	saveChannels.CloseAll()
 	t.log.Info("[scheduler/tickers] All channels closed")
+	return nil, nil
 }
 
 func NewTasksService(l logger.Logger, st *storage.Storage, c *viper.Viper) *Tasks {

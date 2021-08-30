@@ -1,14 +1,15 @@
 package scheduler
 
 import (
+	"strconv"
 	"tickers-parser/internal/service/logger"
 	"time"
 )
 
-type TaskFunction func(args ...interface{})
+type TaskFunction func(args ...interface{}) (interface{}, error)
 
 type IScheduler interface {
-	RunTask(name string, function TaskFunction, args ...interface{}) error
+	RunTask(name string, function TaskFunction, args ...interface{}) (interface{}, error)
 	ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{})
 }
 
@@ -17,19 +18,35 @@ type Scheduler struct {
 	IScheduler
 }
 
-func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) {
+func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) (interface{}, error) {
 	s.logger.Info("[scheduler/" + name + "] Task started")
-	function(args...)
-	s.logger.Info("[scheduler/" + name + "] Task ended")
+	start := time.Now()
+	res, err := function(args...)
+	if err != nil {
+		return nil, err
+	}
+	end := time.Since(start).Milliseconds()
+	s.logger.Info("[scheduler/" + name + "] Task ended in " + strconv.FormatInt(end, 10) + "ms")
+	return res, nil
 }
 
 func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{}) {
 	t := time.NewTicker(time.Duration(intervalMs) * time.Millisecond)
 	if !ignoreFirstRun {
-		s.RunTask(name, function, args...)
+		go func() {
+			_, err := s.RunTask(name, function, args...)
+			if err != nil {
+				s.logger.Error(err)
+			}
+		}()
 	}
 	for _ = range t.C {
-		s.RunTask(name, function, args...)
+		go func() {
+			_, err := s.RunTask(name, function, args...)
+			if err != nil {
+				s.logger.Error(err)
+			}
+		}()
 	}
 }
 
