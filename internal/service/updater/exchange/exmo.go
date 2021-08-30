@@ -19,15 +19,15 @@ var Exmo = entities.Exchange{
 }
 
 type exmoTicker struct {
-	Buy_price  string `json:"buy_price,omitempty"`
-	Sell_price string `json:"sell_price,omitempty"`
-	Last_trade string `json:"last_trade,omitempty"`
-	High       string `json:"high,omitempty"`
-	Low        string `json:"low,omitempty"`
-	Avg        string `json:"avg,omitempty"`
-	Vol        string `json:"vol,omitempty"`
-	Vol_curr   string `json:"vol_curr,omitempty"`
-	Updated    int64  `json:"updated,omitempty"` //sec
+	BuyPrice  string `json:"buy_price,omitempty"`
+	SellPrice string `json:"sell_price,omitempty"`
+	LastTrade string `json:"last_trade,omitempty"`
+	High      string `json:"high,omitempty"`
+	Low       string `json:"low,omitempty"`
+	Avg       string `json:"avg,omitempty"`
+	Vol       string `json:"vol,omitempty"`
+	VolCurr   string `json:"vol_curr,omitempty"`
+	Updated   int64  `json:"updated,omitempty"` //sec
 }
 
 func exmoFetchTickers(channels *types.ChannelsPair) {
@@ -44,8 +44,8 @@ func exmoFetchTickers(channels *types.ChannelsPair) {
 	for pair, data := range rawTickers {
 		symbols := strings.Split(pair, "_")
 		volume, _ := strconv.ParseFloat(data.Vol, 64)
-		bid, _ := strconv.ParseFloat(data.Sell_price, 64)
-		ask, _ := strconv.ParseFloat(data.Buy_price, 64)
+		bid, _ := strconv.ParseFloat(data.SellPrice, 64)
+		ask, _ := strconv.ParseFloat(data.BuyPrice, 64)
 		high, _ := strconv.ParseFloat(data.High, 64)
 		low, _ := strconv.ParseFloat(data.Vol, 64)
 		ticker := entities.Ticker{
