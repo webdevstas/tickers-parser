@@ -10,8 +10,8 @@ import (
 func FetchJson(url string, link interface{}) error {
 	resp, err := http.Get(url)
 
-	if err != nil {
-		err = fmt.Errorf("error to get %v. %v", url, err)
+	if err != nil || resp.StatusCode != 200 {
+		err = fmt.Errorf("error to get %v. Code %d. Error: %v", url, resp.StatusCode, err)
 		return err
 	}
 

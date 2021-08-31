@@ -51,7 +51,8 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	for i := 0; i < exchange.ExchangesCount; i++ {
 		select {
 		case err := <-tickersChannels.CancelChannel:
-			return nil, err
+			t.log.Error(err)
+			continue
 		case result := <-tickersChannels.DataChannel:
 			tickers := result.(entities.ExchangeTickers)
 			go func(channels types.ChannelsPair) {
@@ -64,7 +65,8 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 			}(saveChannels)
 			select {
 			case err := <-saveChannels.CancelChannel:
-				return nil, err
+				t.log.Error(err)
+				continue
 			case <-saveChannels.DataChannel:
 				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange)
 				runtime.Gosched()
