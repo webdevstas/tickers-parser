@@ -28,13 +28,14 @@ func (t *Tasks) RunTasks() {
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	exchanges := exchange.GetExchangesForTickersUpdate()
+	exchangesCount := len(exchanges)
 	tickersChannels := types.ChannelsPair{
-		DataChannel:   make(chan interface{}, exchange.ExchangesCount),
-		CancelChannel: make(chan error, exchange.ExchangesCount),
+		DataChannel:   make(chan interface{}, exchangesCount),
+		CancelChannel: make(chan error, exchangesCount),
 	}
 	saveChannels := types.ChannelsPair{
-		CancelChannel: make(chan error, exchange.ExchangesCount),
-		DataChannel:   make(chan interface{}, exchange.ExchangesCount),
+		CancelChannel: make(chan error, exchangesCount),
+		DataChannel:   make(chan interface{}, exchangesCount),
 	}
 
 	for _, ex := range exchanges {
@@ -48,7 +49,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		}(ex, tickersChannels)
 	}
 
-	for i := 0; i < exchange.ExchangesCount; i++ {
+	for i := 0; i < exchangesCount; i++ {
 		select {
 		case err := <-tickersChannels.CancelChannel:
 			t.log.Error(err)

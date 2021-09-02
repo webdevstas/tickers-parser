@@ -11,7 +11,7 @@ import (
 
 type Services struct {
 	Monitoring *Monitoring
-	Exchanges  [exchange.ExchangesCount]entities.Exchange
+	Exchanges  []entities.Exchange
 	Tasks      *scheduler.Tasks
 	Storage    *storage.Storage
 }
