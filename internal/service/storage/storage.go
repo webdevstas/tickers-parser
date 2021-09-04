@@ -1,11 +1,11 @@
 package storage
 
-type IStorage interface {
+type ISaver interface {
 	Save(name string, timestamp int64, data interface{}) (bool, error)
 }
 
 type Storage struct {
-	SaveService IStorage
+	SaveService ISaver
 }
 
 func (s *Storage) Save(name string, timestamp int64, data interface{}) (bool, error) {
@@ -16,7 +16,7 @@ func (s *Storage) Save(name string, timestamp int64, data interface{}) (bool, er
 	return res, nil
 }
 
-func NewStorageService(saveService IStorage) *Storage {
+func NewStorageService(saveService ISaver) *Storage {
 	return &Storage{
 		SaveService: saveService,
 	}
