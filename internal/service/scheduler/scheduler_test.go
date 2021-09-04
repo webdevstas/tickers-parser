@@ -3,6 +3,7 @@ package scheduler
 import (
 	"errors"
 	"fmt"
+	"sync"
 	"testing"
 	"tickers-parser/internal/service/logger"
 	"tickers-parser/internal/types"
@@ -41,44 +42,61 @@ func TestScheduler_RunTask(t *testing.T) {
 	}
 }
 
-func TestScheduler_ScheduleRecurrentTask(t *testing.T) {
+func TestScheduler_ScheduleRecurrentTaskSucceed(t *testing.T) {
 	channels := types.ChannelsPair{
 		DataChannel:   make(chan interface{}),
 		CancelChannel: make(chan error),
 	}
 	s := getService()
-
-	// Succeed
+	var wg sync.WaitGroup
+	wg.Add(1)
 	succeedFunc := func(args ...interface{}) (interface{}, error) {
 		channels, ok := args[0].(types.ChannelsPair)
+		wg := args[1].(*sync.WaitGroup)
 		if !ok {
 			t.Error(errors.New("wrong argument for channels pair"))
-			t.FailNow()
 		}
+		wg.Done()
 		channels.DataChannel <- "Cool"
 		return nil, nil
 	}
-	go s.ScheduleRecurrentTask("succeed_task", 1*60*1000, false, succeedFunc, channels)
+	go s.ScheduleRecurrentTask("succeed_task", 1*60*1000, false, succeedFunc, channels, &wg)
 
-	// Errored
-	erroredFunc := func(args ...interface{}) (interface{}, error) {
+	wg.Wait()
+	select {
+	case <-channels.DataChannel:
+		s.Logger.Info("ok")
+	default:
+		t.Error("no data received from function")
+	}
+}
+
+func TestScheduler_ScheduleRecurrentTaskErrored(t *testing.T) {
+	channels := types.ChannelsPair{
+		DataChannel:   make(chan interface{}),
+		CancelChannel: make(chan error),
+	}
+	s := getService()
+	var wg sync.WaitGroup
+	wg.Add(1)
+	succeedFunc := func(args ...interface{}) (interface{}, error) {
 		channels, ok := args[0].(types.ChannelsPair)
+		wg := args[1].(*sync.WaitGroup)
 		if !ok {
 			t.Error(errors.New("wrong argument for channels pair"))
-			t.FailNow()
 		}
+		wg.Done()
 		err := errors.New("good error")
 		channels.CancelChannel <- err
 		return nil, err
 	}
-	go s.ScheduleRecurrentTask("errored_task", 1*60*1000, false, erroredFunc, channels)
+	go s.ScheduleRecurrentTask("succeed_task", 1*60*1000, false, succeedFunc, channels, &wg)
 
-	for i := 0; i < 2; i++ {
-		select {
-		case <-channels.DataChannel:
-			s.Logger.Info("data received")
-		case <-channels.CancelChannel:
-			s.Logger.Info("error received")
-		}
+	wg.Wait()
+	select {
+	case <-channels.CancelChannel:
+		s.Logger.Info("ok")
+	default:
+		t.Error("no data received from function")
 	}
 }
