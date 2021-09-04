@@ -61,7 +61,6 @@ func TestScheduler_ScheduleRecurrentTaskSucceed(t *testing.T) {
 		return nil, nil
 	}
 	go s.ScheduleRecurrentTask("succeed_task", 1*60*1000, false, succeedFunc, channels, &wg)
-
 	wg.Wait()
 	select {
 	case <-channels.DataChannel:
@@ -91,7 +90,6 @@ func TestScheduler_ScheduleRecurrentTaskErrored(t *testing.T) {
 		return nil, err
 	}
 	go s.ScheduleRecurrentTask("succeed_task", 1*60*1000, false, succeedFunc, channels, &wg)
-
 	wg.Wait()
 	select {
 	case <-channels.CancelChannel:
