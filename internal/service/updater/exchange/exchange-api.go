@@ -4,6 +4,6 @@ import (
 	"tickers-parser/internal/entities"
 )
 
-func GetExchangesForTickersUpdate() []entities.Exchange {
-	return []entities.Exchange{Allbit, Exmo, Ascendex}
+func GetExchangesForTickersUpdate() []entities.IExchange {
+	return []entities.IExchange{Allbit, Exmo, Ascendex}
 }

@@ -39,8 +39,8 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	}
 
 	for _, ex := range exchanges {
-		go func(exchange entities.Exchange, channels types.ChannelsPair) {
-			res, err := exchange.FetchTickers()
+		go func(exchange entities.IExchange, channels types.ChannelsPair) {
+			res, err := exchange.FetchRawTickers()
 			if err != nil {
 				channels.CancelChannel <- err
 				return
@@ -55,9 +55,9 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 			t.log.Warn(err)
 			continue
 		case result := <-tickersChannels.DataChannel:
-			tickers := result.(entities.ExchangeTickers)
+			tickers := result.(entities.ExchangeRawTickers)
 			go func(channels types.ChannelsPair) {
-				res, err := t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers)
+				res, err := t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.RawTickers)
 				if err != nil {
 					channels.CancelChannel <- err
 				} else {
