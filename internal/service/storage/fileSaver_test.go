@@ -40,4 +40,9 @@ func TestFileSaver_Save(t *testing.T) {
 	if bytesData, _ := json.Marshal(data); bytes.Compare(file, bytesData) != 0 {
 		t.Error("data not eq")
 	}
+	//clean up
+	err = os.RemoveAll(fmt.Sprintf("%v/%v", wd, rootPath))
+	if err != nil {
+		t.Error(err)
+	}
 }
