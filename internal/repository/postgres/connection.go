@@ -2,8 +2,9 @@ package postgres
 
 import (
 	"fmt"
-	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 	"tickers-parser/internal/service/logger"
 )
 
@@ -15,7 +16,7 @@ type DbConf struct {
 	password string
 }
 
-func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*sqlx.DB, error) {
+func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*gorm.DB, error) {
 
 	var conf = DbConf{
 		host:     config.GetString("postgres.url"),
@@ -25,21 +26,12 @@ func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*sqlx.DB, err
 		password: config.GetString("postgres.password"),
 	}
 
-	var db *sqlx.DB
-
-	db, err := sqlx.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=disable", conf.host, conf.port, conf.user, conf.dbname, conf.password))
+	db, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Europe/Moscow", conf.host, conf.user, conf.password, conf.dbname, conf.port)))
 
 	if err != nil {
 		logger.Error(err)
 	}
 
-	// force a connection and test that it worked
-	err = db.Ping()
-
-	if err != nil {
-		logger.Errorf("Error to connect DB: %v", err)
-	}
-
-	logger.Info("Connection with Postgress succeed")
+	logger.Info("Connection with Postgres succeed")
 	return db, nil
 }

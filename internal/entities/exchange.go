@@ -1,6 +1,7 @@
 package entities
 
 import (
+	"gorm.io/gorm"
 	"tickers-parser/internal/utils"
 	"time"
 )
@@ -10,7 +11,7 @@ type IExchange interface {
 }
 
 type Exchange struct {
-	Id         int    `json:"id,omitempty" db:"id"`
+	gorm.Model
 	Key        string `json:"key" db:"key"`
 	Name       string `json:"name,omitempty" db:"name"`
 	Enabled    bool   `json:"enabled,omitempty" db:"enabled"`
