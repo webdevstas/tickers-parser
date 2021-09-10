@@ -6,7 +6,7 @@ import (
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/service/logger"
 	"tickers-parser/internal/service/storage"
-	"tickers-parser/internal/service/updater/exchange"
+	"tickers-parser/internal/service/updater"
 	"tickers-parser/internal/types"
 )
 
@@ -27,7 +27,7 @@ func (t *Tasks) RunTasks() {
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
-	exchanges := exchange.GetExchangesForTickersUpdate()
+	exchanges := updater.GetExchangesForTickersUpdate()
 	exchangesCount := len(exchanges)
 	tickersChannels := types.ChannelsPair{
 		DataChannel:   make(chan interface{}, exchangesCount),

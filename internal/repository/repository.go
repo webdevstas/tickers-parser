@@ -6,11 +6,11 @@ import (
 )
 
 type Repositories struct {
-	Ticker *TickerRepository
+	Temp *sqlx.DB
 }
 
 func GetRepositories(db *sqlx.DB, log logger.Logger) *Repositories {
 	return &Repositories{
-		Ticker: GetTickerRepository(db, log),
+		Temp: db,
 	}
 }

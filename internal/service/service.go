@@ -6,7 +6,7 @@ import (
 	"tickers-parser/internal/service/logger"
 	"tickers-parser/internal/service/scheduler"
 	"tickers-parser/internal/service/storage"
-	"tickers-parser/internal/service/updater/exchange"
+	"tickers-parser/internal/service/updater"
 )
 
 type Services struct {
@@ -21,7 +21,7 @@ func GetServices(l logger.Logger, c *viper.Viper) *Services {
 	fileStorageService := storage.NewStorageService(fileSaver)
 	return &Services{
 		Monitoring: NewMonitoringService(l, c),
-		Exchanges:  exchange.GetExchangesForTickersUpdate(),
+		Exchanges:  updater.GetExchangesForTickersUpdate(),
 		Tasks:      scheduler.NewTasksService(l, fileStorageService, c),
 		Storage:    fileStorageService,
 	}
