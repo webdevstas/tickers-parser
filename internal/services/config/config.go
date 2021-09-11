@@ -2,7 +2,7 @@ package config
 
 import (
 	"github.com/spf13/viper"
-	"tickers-parser/internal/service/logger"
+	"tickers-parser/internal/services/logger"
 )
 
 func NewConfigModule(logger logger.Logger) *viper.Viper {

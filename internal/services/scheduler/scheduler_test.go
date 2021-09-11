@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"sync"
 	"testing"
-	"tickers-parser/internal/service/logger"
+	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/types"
 )
 

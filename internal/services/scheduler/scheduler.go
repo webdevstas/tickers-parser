@@ -2,7 +2,7 @@ package scheduler
 
 import (
 	"strconv"
-	"tickers-parser/internal/service/logger"
+	"tickers-parser/internal/services/logger"
 	"time"
 )
 

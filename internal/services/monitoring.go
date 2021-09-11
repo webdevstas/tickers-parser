@@ -2,7 +2,7 @@ package service
 
 import (
 	"github.com/spf13/viper"
-	"tickers-parser/internal/service/logger"
+	"tickers-parser/internal/services/logger"
 )
 
 type Monitoring struct {

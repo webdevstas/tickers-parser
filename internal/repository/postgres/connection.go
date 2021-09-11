@@ -5,7 +5,7 @@ import (
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"tickers-parser/internal/service/logger"
+	"tickers-parser/internal/services/logger"
 )
 
 type DbConf struct {
