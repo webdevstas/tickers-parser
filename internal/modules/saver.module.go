@@ -10,17 +10,17 @@ import (
 	"tickers-parser/internal/services/updater"
 )
 
-type Services struct {
+type SaverModule struct {
 	Monitoring *service.Monitoring
 	Exchanges  []entities.IExchange
 	Tasks      *scheduler.Tasks
 	Storage    *storage.Storage
 }
 
-func InitSaverModule(l logger.Logger, c *viper.Viper) *Services {
+func InitSaverModule(l logger.Logger, c *viper.Viper) *SaverModule {
 	fileSaver := storage.NewFileSaver(c.GetString("app.dataRoot"))
 	fileStorageService := storage.NewStorageService(fileSaver)
-	return &Services{
+	return &SaverModule{
 		Monitoring: service.NewMonitoringService(l, c),
 		Exchanges:  updater.GetExchangesForTickersUpdate(),
 		Tasks:      scheduler.NewTasksService(l, fileStorageService, c),

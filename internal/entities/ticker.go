@@ -1,7 +1,9 @@
 package entities
 
+import "gorm.io/gorm"
+
 type Ticker struct {
-	Id           int     `json:"id" db:"id"`
+	gorm.Model
 	BaseSymbol   string  `json:"baseSymbol" db:"baseSymbol"`
 	QuoteSymbol  string  `json:"quoteSymbol" db:"quoteSymbol"`
 	Volume       float64 `json:"volume" db:"volume"`

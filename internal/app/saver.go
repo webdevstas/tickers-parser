@@ -4,14 +4,12 @@ import (
 	"go.uber.org/fx"
 	"go.uber.org/fx/fxevent"
 	"os"
-	"tickers-parser/internal/config"
 	"tickers-parser/internal/modules"
-	"tickers-parser/internal/repository"
-	"tickers-parser/internal/repository/postgres"
+	"tickers-parser/internal/services/config"
 	"tickers-parser/internal/services/logger"
 )
 
-func Register(s *modules.Services) {
+func Register(s *modules.SaverModule) {
 	s.Tasks.RunTasks()
 }
 
@@ -20,8 +18,6 @@ func StartSaverApp() {
 		fx.Provide(
 			logger.NewLogger,
 			config.NewConfigModule,
-			postgres.ConnectToPostgres,
-			repository.GetRepositories,
 			modules.InitSaverModule,
 		),
 		fx.Invoke(Register),
