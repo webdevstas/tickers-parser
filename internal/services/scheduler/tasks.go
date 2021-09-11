@@ -4,9 +4,9 @@ import (
 	"github.com/spf13/viper"
 	"runtime"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/service/logger"
-	"tickers-parser/internal/service/storage"
-	"tickers-parser/internal/service/updater"
+	"tickers-parser/internal/services/logger"
+	"tickers-parser/internal/services/storage"
+	"tickers-parser/internal/services/updater"
 	"tickers-parser/internal/types"
 )
 

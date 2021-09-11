@@ -2,7 +2,7 @@ package updater
 
 import (
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/service/updater/exchange"
+	"tickers-parser/internal/services/updater/exchange"
 )
 
 func GetExchangesForTickersUpdate() []entities.IExchange {

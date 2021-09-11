@@ -1,26 +1,27 @@
-package service
+package modules
 
 import (
 	"github.com/spf13/viper"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/service/logger"
-	"tickers-parser/internal/service/scheduler"
-	"tickers-parser/internal/service/storage"
-	"tickers-parser/internal/service/updater"
+	"tickers-parser/internal/services"
+	"tickers-parser/internal/services/logger"
+	"tickers-parser/internal/services/scheduler"
+	"tickers-parser/internal/services/storage"
+	"tickers-parser/internal/services/updater"
 )
 
 type Services struct {
-	Monitoring *Monitoring
+	Monitoring *service.Monitoring
 	Exchanges  []entities.IExchange
 	Tasks      *scheduler.Tasks
 	Storage    *storage.Storage
 }
 
-func GetServices(l logger.Logger, c *viper.Viper) *Services {
+func InitSaverModule(l logger.Logger, c *viper.Viper) *Services {
 	fileSaver := storage.NewFileSaver(c.GetString("app.dataRoot"))
 	fileStorageService := storage.NewStorageService(fileSaver)
 	return &Services{
-		Monitoring: NewMonitoringService(l, c),
+		Monitoring: service.NewMonitoringService(l, c),
 		Exchanges:  updater.GetExchangesForTickersUpdate(),
 		Tasks:      scheduler.NewTasksService(l, fileStorageService, c),
 		Storage:    fileStorageService,

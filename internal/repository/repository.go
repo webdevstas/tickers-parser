@@ -2,7 +2,7 @@ package repository
 
 import (
 	"github.com/jmoiron/sqlx"
-	"tickers-parser/internal/service/logger"
+	"tickers-parser/internal/services/logger"
 )
 
 type Repositories struct {
