@@ -5,7 +5,7 @@ import (
 	"tickers-parser/internal/services/logger"
 )
 
-func NewConfigModule(logger logger.Logger) *viper.Viper {
+func InitConfigModule(logger logger.Logger) *viper.Viper {
 	viper.SetConfigName("default")
 	viper.SetConfigType("yaml")
 	viper.AddConfigPath("configs")

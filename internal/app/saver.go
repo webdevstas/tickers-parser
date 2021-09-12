@@ -17,7 +17,7 @@ func StartSaverApp() {
 	app := fx.New(
 		fx.Provide(
 			logger.NewLogger,
-			config.NewConfigModule,
+			config.InitConfigModule,
 			modules.InitSaverModule,
 		),
 		fx.Invoke(Register),
