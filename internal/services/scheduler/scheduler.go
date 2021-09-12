@@ -43,7 +43,7 @@ func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFir
 			}
 		}()
 	}
-	for _ = range t.C {
+	for range t.C {
 		go func() {
 			_, err := s.RunTask(name, function, args...)
 			if err != nil {

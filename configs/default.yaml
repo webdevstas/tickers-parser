@@ -2,8 +2,8 @@ postgres:
   url: 'localhost'
   port: '5432'
   user: 'postgres'
-  password: '260789'
-  database: 'tickers'
+  password: 'password'
+  database: 'parser'
 app:
   dataRoot: 'data'
   tickersInterval: 5 #min

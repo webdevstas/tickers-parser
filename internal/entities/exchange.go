@@ -16,7 +16,7 @@ type Exchange struct {
 	Name       string `json:"name,omitempty" db:"name"`
 	Enabled    bool   `json:"enabled,omitempty" db:"enabled"`
 	TickersUrl string `json:"tickersUrl" db:"tickersUrl"`
-	IExchange
+	IExchange  `gorm:"-"`
 }
 
 type ExchangeTickers struct {
@@ -24,7 +24,6 @@ type ExchangeTickers struct {
 	Timestamp int64
 	Tickers   []Ticker
 }
-
 type ExchangeRawTickers struct {
 	Exchange   string
 	Timestamp  int64

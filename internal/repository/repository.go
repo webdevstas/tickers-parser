@@ -1,16 +1,17 @@
 package repository
 
 import (
-	"github.com/jmoiron/sqlx"
+	"gorm.io/gorm"
+	"tickers-parser/internal/entities"
 	"tickers-parser/internal/services/logger"
 )
 
 type Repositories struct {
-	Temp *sqlx.DB
+	Exchange *gorm.DB
 }
 
-func GetRepositories(db *sqlx.DB, log logger.Logger) *Repositories {
+func GetRepositories(db *gorm.DB, log logger.Logger) *Repositories {
 	return &Repositories{
-		Temp: db,
+		Exchange: db.Model(&entities.Exchange{}),
 	}
 }

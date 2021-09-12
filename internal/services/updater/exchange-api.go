@@ -2,9 +2,11 @@ package updater
 
 import (
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/services/updater/exchange"
+	"tickers-parser/internal/repository"
 )
 
-func GetExchangesForTickersUpdate() []entities.IExchange {
-	return []entities.IExchange{exchange.Allbit, exchange.Exmo, exchange.Ascendex}
+func GetExchangesForTickersUpdate(r *repository.Repositories) []entities.Exchange {
+	var exchanges []entities.Exchange
+	r.Exchange.Where("enabled = true").Find(&exchanges)
+	return exchanges
 }

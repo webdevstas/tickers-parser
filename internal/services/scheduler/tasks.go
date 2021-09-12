@@ -1,13 +1,15 @@
 package scheduler
 
 import (
-	"github.com/spf13/viper"
 	"runtime"
 	"tickers-parser/internal/entities"
+	"tickers-parser/internal/repository"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/storage"
 	"tickers-parser/internal/services/updater"
 	"tickers-parser/internal/types"
+
+	"github.com/spf13/viper"
 )
 
 type ITasks interface {
@@ -15,10 +17,11 @@ type ITasks interface {
 }
 
 type Tasks struct {
-	scheduler *Scheduler
-	log       logger.Logger
-	storage   *storage.Storage
-	config    *viper.Viper
+	scheduler  *Scheduler
+	log        logger.Logger
+	storage    *storage.Storage
+	config     *viper.Viper
+	repository *repository.Repositories
 	ITasks
 }
 
@@ -27,7 +30,7 @@ func (t *Tasks) RunTasks() {
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
-	exchanges := updater.GetExchangesForTickersUpdate()
+	exchanges := updater.GetExchangesForTickersUpdate(t.repository)
 	exchangesCount := len(exchanges)
 	tickersChannels := types.ChannelsPair{
 		DataChannel:   make(chan interface{}, exchangesCount),
@@ -39,7 +42,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	}
 
 	for _, ex := range exchanges {
-		go func(exchange entities.IExchange, channels types.ChannelsPair) {
+		go func(exchange entities.Exchange, channels types.ChannelsPair) {
 			res, err := exchange.FetchRawTickers()
 			if err != nil {
 				channels.CancelChannel <- err
@@ -80,12 +83,13 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-func NewTasksService(l logger.Logger, st *storage.Storage, c *viper.Viper) *Tasks {
+func NewTasksService(l logger.Logger, st *storage.Storage, c *viper.Viper, r *repository.Repositories) *Tasks {
 	t := Tasks{
-		scheduler: InitScheduler(l),
-		log:       l,
-		storage:   st,
-		config:    c,
+		scheduler:  InitScheduler(l),
+		log:        l,
+		storage:    st,
+		config:     c,
+		repository: r,
 	}
 	return &t
 }
