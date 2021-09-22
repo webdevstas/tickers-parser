@@ -1,11 +1,8 @@
 package entities
 
-import "gorm.io/gorm"
-
 type Ticker struct {
-	gorm.Model
-	BaseSymbol   string  `json:"baseSymbol" db:"baseSymbol"`
-	QuoteSymbol  string  `json:"quoteSymbol" db:"quoteSymbol"`
+	From         string  `json:"from" db:"from"`
+	To           string  `json:"to" db:"to"`
 	Volume       float64 `json:"volume" db:"volume"`
 	Bid          float64 `json:"bid" db:"bid"`
 	Ask          float64 `json:"ask" db:"ask"`

@@ -1,4 +1,4 @@
-package updater
+package exchange
 
 import (
 	"tickers-parser/internal/entities"
@@ -6,7 +6,5 @@ import (
 )
 
 func GetExchangesForTickersUpdate(r *repository.Repositories) []entities.Exchange {
-	var exchanges []entities.Exchange
-	r.Exchange.Where("enabled = true").Find(&exchanges)
-	return exchanges
+	return []entities.Exchange{Allbit, Exmo, Ascendex}
 }

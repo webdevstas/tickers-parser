@@ -6,7 +6,7 @@ import (
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/storage"
-	"tickers-parser/internal/services/updater"
+	"tickers-parser/internal/services/updater/exchange"
 	"tickers-parser/internal/types"
 
 	"github.com/spf13/viper"
@@ -30,7 +30,7 @@ func (t *Tasks) RunTasks() {
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
-	exchanges := updater.GetExchangesForTickersUpdate(t.repository)
+	exchanges := exchange.GetExchangesForTickersUpdate(t.repository)
 	exchangesCount := len(exchanges)
 	tickersChannels := types.ChannelsPair{
 		DataChannel:   make(chan interface{}, exchangesCount),
@@ -43,7 +43,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 
 	for _, ex := range exchanges {
 		go func(exchange entities.Exchange, channels types.ChannelsPair) {
-			res, err := exchange.FetchRawTickers()
+			res, err := exchange.FetchTickers()
 			if err != nil {
 				channels.CancelChannel <- err
 				return
@@ -58,9 +58,9 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 			t.log.Warn(err)
 			continue
 		case result := <-tickersChannels.DataChannel:
-			tickers := result.(entities.ExchangeRawTickers)
+			tickers := result.(entities.ExchangeTickers)
 			go func(channels types.ChannelsPair) {
-				res, err := t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.RawTickers)
+				res, err := t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers)
 				if err != nil {
 					channels.CancelChannel <- err
 				} else {
