@@ -19,8 +19,8 @@ func (fs *FileSaver) Save(name string, timestamp int64, data interface{}) (bool,
 		err = nil
 		err = os.Chdir(dataRoot)
 		if err != nil {
-			err = os.Mkdir(fs.rootPath, 0777)
-			err = os.Chdir(dataRoot)
+			os.Mkdir(fs.rootPath, 0777)
+			os.Chdir(dataRoot)
 		}
 		err = nil
 		err = os.Mkdir(name, 0777)

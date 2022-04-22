@@ -35,7 +35,6 @@ func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*gorm.DB, err
 	}
 
 	logger.Info("Connection with Postgres succeed")
-	err = nil
 	err = db.AutoMigrate(&entities.Exchange{}, &entities.Ticker{})
 	if err != nil {
 		logger.Error(err)
