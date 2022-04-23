@@ -1,7 +1,10 @@
 package exchange
 
 import (
+	"strconv"
 	"tickers-parser/internal/entities"
+	"tickers-parser/internal/types"
+	"tickers-parser/internal/utils"
 )
 
 type allbit struct {
@@ -37,4 +40,37 @@ type allbitTicker struct {
 	LowestAsk      string `json:"lowestAsk,omitempty"`
 	BaseAssetName  string `json:"baseAssetName,omitempty"`
 	BaseVolume     string `json:"baseVolume,omitempty"`
+}
+
+func (a *allbit) fetchTickers() ([]types.ExchangeRawTicker, error) {
+	var rawTickers []allbitTicker
+	err := utils.FetchJson(a.TickersUrl, rawTickers)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var result []types.ExchangeRawTicker
+
+	for _, t := range rawTickers {
+		last, _ := strconv.ParseFloat(t.Last, 64)
+		volume, _ := strconv.ParseFloat(t.BaseVolume, 64)
+		high, _ := strconv.ParseFloat(t.High24hr, 64)
+		low, _ := strconv.ParseFloat(t.Low24hr, 64)
+		bid, _ := strconv.ParseFloat(t.HighestBid, 64)
+		ask, _ := strconv.ParseFloat(t.LowestAsk, 64)
+
+		ticker := types.ExchangeRawTicker{
+			BaseSymbol:  t.BaseAsset,
+			QuoteSymbol: t.QuoteAsset,
+			Volume:      volume,
+			Bid:         bid,
+			Ask:         ask,
+			High:        high,
+			Low:         low,
+			Last:        last,
+		}
+		result = append(result, ticker)
+	}
+	return result, nil
 }

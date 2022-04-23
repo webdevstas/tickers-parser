@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func FetchJson(url string, link interface{}) error {
+func FetchJson[T any](url string, link T) error {
 	resp, err := http.Get(url)
 
 	if err != nil || resp.StatusCode != 200 {

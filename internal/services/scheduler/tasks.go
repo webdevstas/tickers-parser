@@ -32,10 +32,12 @@ func (t *Tasks) RunTasks() {
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	exchanges := updater.GetExchangesForTickersUpdate(t.repository)
 	exchangesCount := len(exchanges)
+
 	tickersChannels := types.ChannelsPair{
 		DataChannel:   make(chan interface{}, exchangesCount),
 		CancelChannel: make(chan error, exchangesCount),
 	}
+
 	saveChannels := types.ChannelsPair{
 		CancelChannel: make(chan error, exchangesCount),
 		DataChannel:   make(chan interface{}, exchangesCount),
