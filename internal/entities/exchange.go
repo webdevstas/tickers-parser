@@ -2,12 +2,11 @@ package entities
 
 import (
 	"gorm.io/gorm"
-	"tickers-parser/internal/utils"
-	"time"
+	"tickers-parser/internal/types"
 )
 
 type IExchange interface {
-	FetchRawTickers() (ExchangeRawTickers, error)
+	FetchTickers() ([]types.ExchangeRawTicker, error)
 }
 
 type Exchange struct {
@@ -22,23 +21,5 @@ type Exchange struct {
 type ExchangeTickers struct {
 	Exchange  string
 	Timestamp int64
-	Tickers   []Ticker
-}
-type ExchangeRawTickers struct {
-	Exchange   string
-	Timestamp  int64
-	RawTickers map[string]interface{}
-}
-
-func (e *Exchange) FetchRawTickers() (ExchangeRawTickers, error) {
-	rawTickers := make(map[string]interface{})
-	err := utils.FetchJson(e.TickersUrl, &rawTickers)
-	if err != nil {
-		return ExchangeRawTickers{}, err
-	}
-	return ExchangeRawTickers{
-		Exchange:   e.Key,
-		Timestamp:  time.Now().Unix(),
-		RawTickers: rawTickers,
-	}, nil
+	Tickers   []types.ExchangeRawTicker
 }
