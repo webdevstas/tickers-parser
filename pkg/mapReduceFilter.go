@@ -4,7 +4,7 @@ func Map[T comparable](iterable []T, cb func(el T) T) []T {
 	var res = make([]T, 0, len(iterable))
 
 	for _, el := range iterable {
-		res = append(res, el)
+		res = append(res, cb(el))
 	}
 
 	return res
