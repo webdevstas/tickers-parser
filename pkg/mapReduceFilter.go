@@ -1,17 +1,17 @@
 package mapReduceFilter
 
 func Map[T comparable](iterable []T, cb func(el T) T) []T {
-	var res = make([]T, len(iterable))
+	var res = make([]T, 0, len(iterable))
 
-	for i, el := range iterable {
-		res[i] = cb(el)
+	for _, el := range iterable {
+		res = append(res, el)
 	}
 
 	return res
 }
 
 func Filter[T comparable](iterable []T, cb func(el T) bool) []T {
-	var res = make([]T, 0)
+	var res = make([]T, 0, len(iterable))
 
 	for _, el := range iterable {
 		if cb(el) {
