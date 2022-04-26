@@ -3,8 +3,8 @@ package app
 import (
 	"os"
 	"tickers-parser/internal/modules"
+	"tickers-parser/internal/postgres"
 	"tickers-parser/internal/repository"
-	"tickers-parser/internal/repository/postgres"
 	"tickers-parser/internal/services/config"
 	"tickers-parser/internal/services/logger"
 

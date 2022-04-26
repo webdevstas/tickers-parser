@@ -8,10 +8,12 @@ import (
 
 type Repositories struct {
 	Exchange *gorm.DB
+	Ticker   *gorm.DB
 }
 
 func GetRepositories(db *gorm.DB, log logger.Logger) *Repositories {
 	return &Repositories{
 		Exchange: db.Model(&entities.Exchange{}),
+		Ticker:   db.Model(&entities.Ticker{}),
 	}
 }
