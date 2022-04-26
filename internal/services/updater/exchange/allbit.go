@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/types"
-	"tickers-parser/internal/utils"
+	"tickers-parser/pkg/utils"
 )
 
 type allbit struct {
