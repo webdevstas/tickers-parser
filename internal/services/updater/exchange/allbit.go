@@ -7,24 +7,6 @@ import (
 	"tickers-parser/pkg/utils"
 )
 
-type allbit struct {
-	*entities.Exchange
-}
-
-func getAllbit() *allbit {
-	ex := &entities.Exchange{
-		Key:        "allbit",
-		Name:       "Allbit",
-		Enabled:    true,
-		TickersUrl: "https://allbit.com/api/coin-market-cap-data/",
-	}
-	return &allbit{
-		ex,
-	}
-}
-
-var Allbit = getAllbit()
-
 type allbitTicker struct {
 	QuoteAssetName string `json:"quoteAssetName,omitempty"`
 	Last           string `json:"last,omitempty"`
@@ -42,9 +24,17 @@ type allbitTicker struct {
 	BaseVolume     string `json:"baseVolume,omitempty"`
 }
 
-func (a *allbit) fetchTickers() ([]types.ExchangeRawTicker, error) {
+type allbit struct {
+	*entities.Exchange
+}
+
+func GetAllbit() *allbit {
+	return &allbit{}
+}
+
+func (a *allbit) FetchTickers() ([]types.ExchangeRawTicker, error) {
 	var rawTickers []allbitTicker
-	err := utils.FetchJson(a.TickersUrl, rawTickers)
+	err := utils.FetchJson("https://allbit.com/api/coin-market-cap-data/", &rawTickers)
 
 	if err != nil {
 		return nil, err

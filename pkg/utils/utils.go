@@ -32,8 +32,8 @@ func FetchJson[T any](url string, link T) error {
 	return nil
 }
 
-func Map(iterable []any, cb func(el any) any) []any {
-	var res = make([]any, 0, len(iterable))
+func Map[F, T any](iterable []F, cb func(el F) T) []T {
+	var res = make([]T, 0, len(iterable))
 
 	for _, el := range iterable {
 		res = append(res, cb(el))
