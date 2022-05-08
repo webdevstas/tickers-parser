@@ -10,7 +10,7 @@
             "request": "launch",
             "mode": "auto",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/cmd/app/saver.go"
+            "program": "${workspaceFolder}/cmd/app/parser.go"
         }
     ]
 }

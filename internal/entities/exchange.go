@@ -2,9 +2,8 @@ package entities
 
 import (
 	"fmt"
-	"tickers-parser/internal/types"
-
 	"gorm.io/gorm"
+	"tickers-parser/internal/types"
 )
 
 type IExchange interface {

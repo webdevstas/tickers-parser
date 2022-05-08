@@ -16,11 +16,11 @@ type ITasks interface {
 }
 
 type Tasks struct {
-	scheduler  *Scheduler
-	log        logger.Logger
-	storage    *storage.Storage
-	config     *viper.Viper
-	repository *repository.Repositories
+	scheduler    *Scheduler
+	log          logger.Logger
+	config       *viper.Viper
+	repository   *repository.Repositories
+	tickersStore storage.TickersStore
 	ITasks
 }
 
@@ -41,6 +41,13 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		CancelChannel: make(chan error, exchangesCount),
 		DataChannel:   make(chan interface{}, exchangesCount),
 	}
+
+	defer func() {
+		tickersChannels.CloseAll()
+		saveChannels.CloseAll()
+		t.log.Info("[scheduler/tickers] All channels closed")
+		recover()
+	}()
 
 	for _, ex := range exchanges {
 		go func(exchange entities.Exchange, channels types.ChannelsPair) {
@@ -65,7 +72,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		case result := <-tickersChannels.DataChannel:
 			tickers := result.(entities.ExchangeTickers)
 			go func(channels types.ChannelsPair) {
-				res, err := t.storage.Save(tickers.Exchange, tickers.Timestamp, tickers.Tickers)
+				res, err := t.tickersStore.SaveTickersForExchange(tickers.Exchange, tickers.Tickers)
 				if err != nil {
 					channels.CancelChannel <- err
 				} else {
@@ -82,19 +89,16 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 			}
 		}
 	}
-	tickersChannels.CloseAll()
-	saveChannels.CloseAll()
-	t.log.Info("[scheduler/tickers] All channels closed")
 	return nil, nil
 }
 
-func NewTasksService(l logger.Logger, st *storage.Storage, c *viper.Viper, r *repository.Repositories) *Tasks {
+func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repositories) *Tasks {
 	t := Tasks{
-		scheduler:  InitScheduler(l),
-		log:        l,
-		storage:    st,
-		config:     c,
-		repository: r,
+		scheduler:    InitScheduler(l),
+		log:          l,
+		config:       c,
+		repository:   r,
+		tickersStore: storage.NewTickersStoreService(r),
 	}
 	return &t
 }

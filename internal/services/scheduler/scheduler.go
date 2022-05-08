@@ -15,7 +15,6 @@ type IScheduler interface {
 
 type Scheduler struct {
 	Logger logger.Logger
-	IScheduler
 }
 
 func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) (interface{}, error) {
