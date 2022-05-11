@@ -19,7 +19,8 @@ type ExchangeRawTicker struct {
 	High         float64
 	Low          float64
 	Change       float64
-	BaseAddress  float64
-	QuoteAddress float64
+	BaseAddress  string
+	QuoteAddress string
 	Last         float64
+	Open         float64
 }

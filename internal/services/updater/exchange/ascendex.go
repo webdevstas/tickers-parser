@@ -1,6 +1,7 @@
 package exchange
 
 import (
+	"strings"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/types"
 	"tickers-parser/pkg/utils"
@@ -44,9 +45,11 @@ func (a *ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
 	result := make([]types.ExchangeRawTicker, 0, len(rawTickers))
 
 	for _, ticker := range rawTickers {
-		baseSymbol := strconv.
+		Symbol := strings.Split(ticker.Symbol, "/")
 		result = append(result, types.ExchangeRawTicker{
-			BaseSymbol: ,
+			BaseSymbol:  Symbol[0],
+			QuoteSymbol: Symbol[1],
 		})
 	}
+	return result, nil
 }

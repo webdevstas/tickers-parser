@@ -1,6 +1,8 @@
 package entities
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Ticker struct {
 	gorm.Model
@@ -13,8 +15,6 @@ type Ticker struct {
 	High         float64 `json:"high" db:"high"`
 	Low          float64 `json:"low" db:"low"`
 	Change       float64 `json:"change" db:"change"`
-	UpdatedAt    int64   `json:"updatedAt" db:"updatedAt"`
-	CreatedAt    int     `json:"createdAt" db:"createdAt"`
 	ExchangeId   int     `json:"exchangeId" db:"exchangeId"`
 	BaseCoinId   int     `json:"baseCoinId" db:"baseCoinId"`
 	QuoteCoinId  int     `json:"quoteCoinId" db:"quoteCoinId"`

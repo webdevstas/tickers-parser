@@ -8,7 +8,8 @@ import (
 )
 
 var exchangeMapping = map[string]entities.IExchange{
-	"allbit": exchange.GetAllbit(),
+	"allbit":   exchange.GetAllbit(),
+	"ascendex": exchange.GetAscendex(),
 }
 
 func GetExchangesForTickersUpdate(repo *repository.Repositories) []entities.Exchange {
