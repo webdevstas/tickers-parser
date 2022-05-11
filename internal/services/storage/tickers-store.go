@@ -19,7 +19,7 @@ func NewTickersStoreService(r *repository.Repositories) TickersStore {
 func (s *TickersStore) SaveTickersForExchange(exchangeId uint, tickers []types.ExchangeRawTicker) (bool, error) {
 	for _, ticker := range tickers {
 		resultTicker := RawTickerToEntity(exchangeId, ticker)
-		s.repo.Ticker.Save(resultTicker)
+		s.repo.Ticker.Save(&resultTicker)
 	}
 	return true, nil
 }

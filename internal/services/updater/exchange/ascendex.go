@@ -46,7 +46,12 @@ func (a *ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
 	result := make([]types.ExchangeRawTicker, 0, len(rawTickers))
 
 	for _, ticker := range rawTickers {
-		Symbol := strings.Split(ticker.Symbol, "/")
+		symbol := strings.Split(ticker.Symbol, "/")
+
+		if len(symbol) != 2 {
+			continue
+		}
+
 		open, _ := strconv.ParseFloat(ticker.Open, 64)
 		high, _ := strconv.ParseFloat(ticker.High, 64)
 		low, _ := strconv.ParseFloat(ticker.Low, 64)
@@ -56,8 +61,8 @@ func (a *ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
 		last, _ := strconv.ParseFloat(ticker.Close, 64)
 
 		result = append(result, types.ExchangeRawTicker{
-			BaseSymbol:  Symbol[0],
-			QuoteSymbol: Symbol[1],
+			BaseSymbol:  symbol[0],
+			QuoteSymbol: symbol[1],
 			Open:        open,
 			High:        high,
 			Low:         low,
