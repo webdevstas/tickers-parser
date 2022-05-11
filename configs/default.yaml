@@ -6,4 +6,4 @@ postgres:
   database: 'parser'
 app:
   dataRoot: 'data'
-  tickersInterval: 5 #min
+  tickersInterval: 1 #min

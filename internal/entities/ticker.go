@@ -1,25 +1,27 @@
 package entities
 
 import (
-	"gorm.io/gorm"
+	"time"
 )
 
 type Ticker struct {
-	gorm.Model
-	BaseSymbol   string  `json:"baseSymbol" db:"baseSymbol"`
-	QuoteSymbol  string  `json:"quoteSymbol" db:"quoteSymbol"`
-	Volume       float64 `json:"volume" db:"volume"`
-	Bid          float64 `json:"bid" db:"bid"`
-	Ask          float64 `json:"ask" db:"ask"`
-	Open         float64 `json:"open" db:"open"`
-	High         float64 `json:"high" db:"high"`
-	Low          float64 `json:"low" db:"low"`
-	Change       float64 `json:"change" db:"change"`
-	ExchangeId   uint    `json:"exchangeId" db:"exchangeId"`
-	BaseCoinId   int     `json:"baseCoinId" db:"baseCoinId"`
-	QuoteCoinId  int     `json:"quoteCoinId" db:"quoteCoinId"`
-	BaseAddress  string  `json:"baseAddress" db:"baseAddress"`
-	QuoteAddress string  `json:"quoteAddress" db:"quoteAddress"`
-	Enabled      bool    `json:"enabled" db:"enabled"`
-	Last         float64 `json:"last"`
+	ID           uint      `gorm:"primarykey"`
+	CreatedAt    time.Time `gorm:"column: createdAt"`
+	UpdatedAt    time.Time `gorm:"column: updatedAt"`
+	BaseSymbol   string    `json:"baseSymbol" gorm:"index:ticker_idx,unique; column:baseSymbol"`
+	QuoteSymbol  string    `json:"quoteSymbol" gorm:"index:ticker_idx,unique; column:quoteSymbol"`
+	Volume       float64
+	Bid          float64
+	Ask          float64
+	Open         float64
+	High         float64
+	Low          float64
+	Change       float64
+	ExchangeId   uint   `json:"exchangeId" gorm:"index:ticker_idx,unique; column:exchangeId"`
+	BaseCoinId   int    `json:"baseCoinId" gorm:"column:baseCoinId"`
+	QuoteCoinId  int    `json:"quoteCoinId" gorm:"column:quoteCoinId"`
+	BaseAddress  string `json:"baseAddress" gorm:"column:baseAddress"`
+	QuoteAddress string `json:"quoteAddress" gorm:"column:quoteAddress"`
+	Enabled      bool
+	Last         float64
 }

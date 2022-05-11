@@ -4,6 +4,8 @@ import (
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/types"
+
+	"gorm.io/gorm/clause"
 )
 
 type TickersStore struct {
@@ -19,7 +21,10 @@ func NewTickersStoreService(r *repository.Repositories) TickersStore {
 func (s *TickersStore) SaveTickersForExchange(exchangeId uint, tickers []types.ExchangeRawTicker) (bool, error) {
 	for _, ticker := range tickers {
 		resultTicker := RawTickerToEntity(exchangeId, ticker)
-		s.repo.Ticker.Save(&resultTicker)
+		s.repo.Ticker.Clauses(clause.OnConflict{
+			Columns:   []clause.Column{{Name: "baseSymbol"}, {Name: "quoteSymbol"}, {Name: "exchangeId"}},
+			UpdateAll: true,
+		}).Create(&resultTicker)
 	}
 	return true, nil
 }
