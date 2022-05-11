@@ -15,7 +15,7 @@ type Ticker struct {
 	High         float64 `json:"high" db:"high"`
 	Low          float64 `json:"low" db:"low"`
 	Change       float64 `json:"change" db:"change"`
-	ExchangeId   int     `json:"exchangeId" db:"exchangeId"`
+	ExchangeId   uint    `json:"exchangeId" db:"exchangeId"`
 	BaseCoinId   int     `json:"baseCoinId" db:"baseCoinId"`
 	QuoteCoinId  int     `json:"quoteCoinId" db:"quoteCoinId"`
 	BaseAddress  string  `json:"baseAddress" db:"baseAddress"`

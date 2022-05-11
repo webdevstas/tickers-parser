@@ -12,6 +12,7 @@ type IExchange interface {
 
 type Exchange struct {
 	gorm.Model
+	ID        uint   `gorm:"primary_key"`
 	Key       string `json:"key" db:"key"`
 	Name      string `json:"name,omitempty" db:"name"`
 	Enabled   bool   `json:"enabled,omitempty" db:"enabled"`
@@ -19,9 +20,8 @@ type Exchange struct {
 }
 
 type ExchangeTickers struct {
-	Exchange  string
-	Timestamp int64
-	Tickers   []types.ExchangeRawTicker
+	Exchange Exchange
+	Tickers  []types.ExchangeRawTicker
 }
 
 func (e *Exchange) FetchTickers() ([]types.ExchangeRawTicker, error) {

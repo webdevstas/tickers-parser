@@ -1,6 +1,7 @@
 package exchange
 
 import (
+	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/types"
@@ -46,9 +47,24 @@ func (a *ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
 
 	for _, ticker := range rawTickers {
 		Symbol := strings.Split(ticker.Symbol, "/")
+		open, _ := strconv.ParseFloat(ticker.Open, 64)
+		high, _ := strconv.ParseFloat(ticker.High, 64)
+		low, _ := strconv.ParseFloat(ticker.Low, 64)
+		volume, _ := strconv.ParseFloat(ticker.Volume, 64)
+		ask, _ := strconv.ParseFloat(ticker.Ask[0], 64)
+		bid, _ := strconv.ParseFloat(ticker.Bid[0], 64)
+		last, _ := strconv.ParseFloat(ticker.Close, 64)
+
 		result = append(result, types.ExchangeRawTicker{
 			BaseSymbol:  Symbol[0],
 			QuoteSymbol: Symbol[1],
+			Open:        open,
+			High:        high,
+			Low:         low,
+			Volume:      volume,
+			Ask:         ask,
+			Bid:         bid,
+			Last:        last,
 		})
 	}
 	return result, nil

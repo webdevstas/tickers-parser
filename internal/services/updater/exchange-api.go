@@ -18,6 +18,7 @@ func GetExchangesForTickersUpdate(repo *repository.Repositories) []entities.Exch
 	return utils.Map(exchanges, func(exchange entities.Exchange) entities.Exchange {
 		api := exchangeMapping[exchange.Key]
 		return entities.Exchange{
+			ID:        exchange.ID,
 			Key:       exchange.Key,
 			Name:      exchange.Name,
 			IExchange: api,

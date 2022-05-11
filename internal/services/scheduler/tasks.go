@@ -46,13 +46,12 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		tickersChannels.CloseAll()
 		saveChannels.CloseAll()
 		t.log.Info("[scheduler/tickers] All channels closed")
-		recover()
 	}()
 
 	for _, ex := range exchanges {
 		go func(exchange entities.Exchange, channels types.ChannelsPair) {
 			exchangeTickers := entities.ExchangeTickers{
-				Exchange: exchange.Key,
+				Exchange: exchange,
 			}
 			res, err := exchange.FetchTickers()
 			if err != nil {
@@ -72,7 +71,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		case result := <-tickersChannels.DataChannel:
 			tickers := result.(entities.ExchangeTickers)
 			go func(channels types.ChannelsPair) {
-				res, err := t.tickersStore.SaveTickersForExchange(tickers.Exchange, tickers.Tickers)
+				res, err := t.tickersStore.SaveTickersForExchange(tickers.Exchange.ID, tickers.Tickers)
 				if err != nil {
 					channels.CancelChannel <- err
 				} else {
@@ -84,7 +83,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 				t.log.Warn(err)
 				continue
 			case <-saveChannels.DataChannel:
-				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange)
+				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange.Key)
 				runtime.Gosched()
 			}
 		}

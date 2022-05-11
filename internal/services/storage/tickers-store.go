@@ -16,17 +16,15 @@ func NewTickersStoreService(r *repository.Repositories) TickersStore {
 	}
 }
 
-func (s *TickersStore) SaveTickersForExchange(exchangeKey string, tickers []types.ExchangeRawTicker) (bool, error) {
+func (s *TickersStore) SaveTickersForExchange(exchangeId uint, tickers []types.ExchangeRawTicker) (bool, error) {
 	for _, ticker := range tickers {
-		go func(ticker types.ExchangeRawTicker) {
-			resultTicker := RawTickerToEntity(ticker)
-			s.repo.Ticker.Save(resultTicker)
-		}(ticker)
+		resultTicker := RawTickerToEntity(exchangeId, ticker)
+		s.repo.Ticker.Save(resultTicker)
 	}
 	return true, nil
 }
 
-func RawTickerToEntity(rawTicker types.ExchangeRawTicker) entities.Ticker {
+func RawTickerToEntity(exchangeId uint, rawTicker types.ExchangeRawTicker) entities.Ticker {
 	return entities.Ticker{
 		BaseSymbol:   rawTicker.BaseSymbol,
 		QuoteSymbol:  rawTicker.QuoteSymbol,
@@ -37,7 +35,7 @@ func RawTickerToEntity(rawTicker types.ExchangeRawTicker) entities.Ticker {
 		High:         rawTicker.High,
 		Low:          rawTicker.Low,
 		Change:       rawTicker.Change,
-		ExchangeId:   0,
+		ExchangeId:   exchangeId,
 		BaseCoinId:   0,
 		QuoteCoinId:  0,
 		BaseAddress:  rawTicker.BaseAddress,
