@@ -9,11 +9,11 @@ import (
 )
 
 type ascendex struct {
-	*entities.Exchange
+	entities.Exchange
 }
 
-func GetAscendex() *ascendex {
-	return &ascendex{}
+func GetAscendex() ascendex {
+	return ascendex{}
 }
 
 type ascendexTicker struct {
@@ -33,7 +33,7 @@ type ascendexResponse struct {
 	Data []ascendexTicker `json:"data"`
 }
 
-func (a *ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
+func (a ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
 	tickersUrl := "https://ascendex.com/api/pro/v1/ticker"
 	var response ascendexResponse
 	err := utils.FetchJson(tickersUrl, &response)

@@ -1,11 +1,11 @@
 package types
 
-type ChannelsPair struct {
-	DataChannel   chan interface{}
+type ChannelsPair[T any] struct {
+	DataChannel   chan T
 	CancelChannel chan error
 }
 
-func (pair ChannelsPair) CloseAll() {
+func (pair ChannelsPair[any]) CloseAll() {
 	close(pair.CancelChannel)
 	close(pair.DataChannel)
 }
@@ -23,4 +23,8 @@ type ExchangeRawTicker struct {
 	QuoteAddress string
 	Last         float64
 	Open         float64
+}
+
+type TickersFetchable interface {
+	FetchTickers() ([]ExchangeRawTicker, error)
 }

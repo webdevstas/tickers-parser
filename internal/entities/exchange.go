@@ -2,21 +2,18 @@ package entities
 
 import (
 	"fmt"
-	"gorm.io/gorm"
 	"tickers-parser/internal/types"
+	"time"
 )
 
-type IExchange interface {
-	FetchTickers() ([]types.ExchangeRawTicker, error)
-}
-
 type Exchange struct {
-	gorm.Model
-	ID        uint   `gorm:"primary_key"`
-	Key       string `json:"key" db:"key"`
-	Name      string `json:"name,omitempty" db:"name"`
-	Enabled   bool   `json:"enabled,omitempty" db:"enabled"`
-	IExchange `gorm:"-"`
+	ID                     uint      `gorm:"primarykey"`
+	CreatedAt              time.Time `gorm:"column:createdAt"`
+	UpdatedAt              time.Time `gorm:"column:updatedAt"`
+	Key                    string    `json:"key" db:"key"`
+	Name                   string    `json:"name,omitempty"`
+	Enabled                bool      `json:"enabled,omitempty"`
+	types.TickersFetchable `gorm:"-"`
 }
 
 type ExchangeTickers struct {
@@ -25,8 +22,8 @@ type ExchangeTickers struct {
 }
 
 func (e *Exchange) FetchTickers() ([]types.ExchangeRawTicker, error) {
-	if e.IExchange == nil {
+	if e.TickersFetchable == nil {
 		return nil, fmt.Errorf("not implemented fetch tickers method for exchange %v", e.Key)
 	}
-	return e.IExchange.FetchTickers()
+	return e.TickersFetchable.FetchTickers()
 }

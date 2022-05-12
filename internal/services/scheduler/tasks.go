@@ -21,7 +21,6 @@ type Tasks struct {
 	config       *viper.Viper
 	repository   *repository.Repositories
 	tickersStore storage.TickersStore
-	ITasks
 }
 
 func (t *Tasks) RunTasks() {
@@ -32,12 +31,12 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	exchanges := updater.GetExchangesForTickersUpdate(t.repository)
 	exchangesCount := len(exchanges)
 
-	tickersChannels := types.ChannelsPair{
-		DataChannel:   make(chan interface{}, exchangesCount),
+	tickersChannels := types.ChannelsPair[entities.ExchangeTickers]{
+		DataChannel:   make(chan entities.ExchangeTickers, exchangesCount),
 		CancelChannel: make(chan error, exchangesCount),
 	}
 
-	saveChannels := types.ChannelsPair{
+	saveChannels := types.ChannelsPair[interface{}]{
 		CancelChannel: make(chan error, exchangesCount),
 		DataChannel:   make(chan interface{}, exchangesCount),
 	}
@@ -49,7 +48,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	}()
 
 	for _, ex := range exchanges {
-		go func(exchange entities.Exchange, channels types.ChannelsPair) {
+		go func(exchange entities.Exchange, channels types.ChannelsPair[entities.ExchangeTickers]) {
 			exchangeTickers := entities.ExchangeTickers{
 				Exchange: exchange,
 			}
@@ -69,8 +68,8 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 			t.log.Warn(err)
 			continue
 		case result := <-tickersChannels.DataChannel:
-			tickers := result.(entities.ExchangeTickers)
-			go func(channels types.ChannelsPair) {
+			tickers := result
+			go func(channels types.ChannelsPair[interface{}]) {
 				res, err := t.tickersStore.SaveTickersForExchange(tickers.Exchange.ID, tickers.Tickers)
 				if err != nil {
 					channels.CancelChannel <- err
