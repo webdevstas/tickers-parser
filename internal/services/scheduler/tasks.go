@@ -6,7 +6,6 @@ import (
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/services/logger"
-	"tickers-parser/internal/services/storage"
 	"tickers-parser/internal/services/updater"
 	"tickers-parser/internal/types"
 )
@@ -19,8 +18,8 @@ type Tasks struct {
 	scheduler    *Scheduler
 	log          logger.Logger
 	config       *viper.Viper
-	repository   *repository.Repositories
-	tickersStore storage.TickersStore
+	repository   repository.IRepository
+	tickersStore updater.TickersStore
 }
 
 func (t *Tasks) RunTasks() {
@@ -28,7 +27,7 @@ func (t *Tasks) RunTasks() {
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
-	exchanges := updater.GetExchangesForTickersUpdate(t.repository)
+	exchanges := t.repository.GetExchangesForTickersUpdate()
 	exchangesCount := len(exchanges)
 
 	tickersChannels := types.ChannelsPair[entities.ExchangeTickers]{
@@ -90,13 +89,13 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repositories) *Tasks {
+func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) *Tasks {
 	t := Tasks{
 		scheduler:    InitScheduler(l),
 		log:          l,
 		config:       c,
 		repository:   r,
-		tickersStore: storage.NewTickersStoreService(r),
+		tickersStore: updater.NewTickersStoreService(r),
 	}
 	return &t
 }

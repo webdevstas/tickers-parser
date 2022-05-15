@@ -2,26 +2,44 @@ package entities
 
 import (
 	"fmt"
-	"tickers-parser/internal/types"
 	"time"
 )
 
+type TickersFetchable interface {
+	FetchTickers() ([]ExchangeRawTicker, error)
+}
+
 type Exchange struct {
-	ID                     uint      `gorm:"primarykey"`
-	CreatedAt              time.Time `gorm:"column:createdAt"`
-	UpdatedAt              time.Time `gorm:"column:updatedAt"`
-	Key                    string    `json:"key" db:"key"`
-	Name                   string    `json:"name,omitempty"`
-	Enabled                bool      `json:"enabled,omitempty"`
-	types.TickersFetchable `gorm:"-"`
+	ID               uint      `gorm:"primarykey"`
+	CreatedAt        time.Time `gorm:"column:createdAt"`
+	UpdatedAt        time.Time `gorm:"column:updatedAt"`
+	Key              string    `json:"key" db:"key"`
+	Name             string    `json:"name,omitempty"`
+	Enabled          bool      `json:"enabled,omitempty"`
+	TickersFetchable `gorm:"-"`
 }
 
 type ExchangeTickers struct {
 	Exchange Exchange
-	Tickers  []types.ExchangeRawTicker
+	Tickers  []ExchangeRawTicker
 }
 
-func (e *Exchange) FetchTickers() ([]types.ExchangeRawTicker, error) {
+type ExchangeRawTicker struct {
+	BaseSymbol   string
+	QuoteSymbol  string
+	Volume       float64
+	Bid          float64
+	Ask          float64
+	High         float64
+	Low          float64
+	Change       float64
+	BaseAddress  string
+	QuoteAddress string
+	Last         float64
+	Open         float64
+}
+
+func (e *Exchange) FetchTickers() ([]ExchangeRawTicker, error) {
 	if e.TickersFetchable == nil {
 		return nil, fmt.Errorf("not implemented fetch tickers method for exchange %v", e.Key)
 	}

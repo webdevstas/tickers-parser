@@ -4,7 +4,6 @@ import (
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/types"
 	"tickers-parser/pkg/utils"
 )
 
@@ -33,7 +32,7 @@ type ascendexResponse struct {
 	Data []ascendexTicker `json:"data"`
 }
 
-func (a ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
+func (a ascendex) FetchTickers() ([]entities.ExchangeRawTicker, error) {
 	tickersUrl := "https://ascendex.com/api/pro/v1/ticker"
 	var response ascendexResponse
 	err := utils.FetchJson(tickersUrl, &response)
@@ -43,7 +42,7 @@ func (a ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
 	}
 
 	rawTickers := response.Data
-	result := make([]types.ExchangeRawTicker, 0, len(rawTickers))
+	result := make([]entities.ExchangeRawTicker, 0, len(rawTickers))
 
 	for _, ticker := range rawTickers {
 		symbol := strings.Split(ticker.Symbol, "/")
@@ -60,7 +59,7 @@ func (a ascendex) FetchTickers() ([]types.ExchangeRawTicker, error) {
 		bid, _ := strconv.ParseFloat(ticker.Bid[0], 64)
 		last, _ := strconv.ParseFloat(ticker.Close, 64)
 
-		result = append(result, types.ExchangeRawTicker{
+		result = append(result, entities.ExchangeRawTicker{
 			BaseSymbol:  symbol[0],
 			QuoteSymbol: symbol[1],
 			Open:        open,

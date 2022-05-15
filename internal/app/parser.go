@@ -21,7 +21,7 @@ func StartParserApp() {
 			logger.NewLogger,
 			config.InitConfigModule,
 			postgres.ConnectToPostgres,
-			repository.GetRepositories,
+			repository.GetRepository,
 			scheduler.NewTasksService,
 		),
 		fx.Invoke(Register),
