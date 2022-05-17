@@ -6,7 +6,7 @@ import (
 )
 
 type TickersStore struct {
-	repo *repository.Repository
+	repo repository.IRepository
 }
 
 func NewTickersStoreService(r *repository.Repository) TickersStore {

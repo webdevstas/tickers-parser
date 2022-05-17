@@ -39,6 +39,7 @@ func (r *Repository) SaveTickersForExchange(exchangeId uint, tickers []entities.
 }
 
 func (r *Repository) GetExchangesForTickersUpdate() []entities.Exchange {
+
 	var ExchangeMapping = map[string]entities.TickersFetchable{
 		"ascendex": exchange.GetAscendex(),
 	}
@@ -56,7 +57,7 @@ func (r *Repository) GetExchangesForTickersUpdate() []entities.Exchange {
 	})
 }
 
-// Usefull methods
+// Usefull functions
 func RawTickerToEntity(exchangeId uint, rawTicker entities.ExchangeRawTicker) entities.Ticker {
 	return entities.Ticker{
 		BaseSymbol:   rawTicker.BaseSymbol,
