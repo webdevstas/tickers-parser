@@ -1,13 +1,15 @@
 package scheduler
 
 import (
-	"github.com/spf13/viper"
+	"context"
 	"runtime"
+	"sync"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/updater"
-	"tickers-parser/internal/types"
+
+	"github.com/spf13/viper"
 )
 
 type ITasks interface {
@@ -28,64 +30,42 @@ func (t *Tasks) RunTasks() {
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	exchanges := t.repository.GetExchangesForTickersUpdate()
-	exchangesCount := len(exchanges)
+	wg := &sync.WaitGroup{}
+	ctx := context.Background()
+	inpChan := make(chan entities.Exchange)
+	outChan := make(chan entities.ExchangeTickers)
 
-	tickersChannels := types.ChannelsPair[entities.ExchangeTickers]{
-		DataChannel:   make(chan entities.ExchangeTickers, exchangesCount),
-		CancelChannel: make(chan error, exchangesCount),
+	for i := 0; i <= runtime.NumCPU(); i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			worker(ctx, inpChan, outChan)
+		}()
 	}
 
-	saveChannels := types.ChannelsPair[interface{}]{
-		CancelChannel: make(chan error, exchangesCount),
-		DataChannel:   make(chan interface{}, exchangesCount),
-	}
-
-	defer func() {
-		tickersChannels.CloseAll()
-		saveChannels.CloseAll()
-		t.log.Info("[scheduler/tickers] All channels closed")
+	go func() {
+		for _, ex := range exchanges {
+			inpChan <- ex
+		}
+		close(inpChan)
 	}()
 
-	for _, ex := range exchanges {
-		go func(exchange entities.Exchange, channels types.ChannelsPair[entities.ExchangeTickers]) {
-			exchangeTickers := entities.ExchangeTickers{
-				Exchange: exchange,
-			}
-			res, err := exchange.FetchTickers()
-			if err != nil {
-				channels.CancelChannel <- err
+	go func() {
+		wg.Wait()
+		close(outChan)
+	}()
+
+	for res := range outChan {
+		go func(tickersResult entities.ExchangeTickers) {
+			ok, err := t.repository.SaveTickersForExchange(tickersResult.Exchange.ID, tickersResult.Tickers)
+			if !ok {
+				t.log.Error(err)
 				return
 			}
-			exchangeTickers.Tickers = res
-			channels.DataChannel <- exchangeTickers
-		}(ex, tickersChannels)
+			t.log.Info("tickers for exchange ", tickersResult.Exchange.Key, " saved")
+		}(res)
 	}
 
-	for i := 0; i < exchangesCount; i++ {
-		select {
-		case err := <-tickersChannels.CancelChannel:
-			t.log.Warn(err)
-			continue
-		case result := <-tickersChannels.DataChannel:
-			tickers := result
-			go func(channels types.ChannelsPair[interface{}]) {
-				res, err := t.tickersStore.SaveTickersForExchange(tickers.Exchange.ID, tickers.Tickers)
-				if err != nil {
-					channels.CancelChannel <- err
-				} else {
-					channels.DataChannel <- res
-				}
-			}(saveChannels)
-			select {
-			case err := <-saveChannels.CancelChannel:
-				t.log.Warn(err)
-				continue
-			case <-saveChannels.DataChannel:
-				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange.Key)
-				runtime.Gosched()
-			}
-		}
-	}
 	return nil, nil
 }
 
@@ -98,4 +78,25 @@ func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) 
 		tickersStore: updater.NewTickersStoreService(r),
 	}
 	return &t
+}
+
+func worker(ctx context.Context, inpChan chan entities.Exchange, outChan chan entities.ExchangeTickers) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case ex, ok := <-inpChan:
+			if !ok {
+				return
+			}
+			tickers, err := ex.FetchTickers()
+			if err != nil {
+				ctx.Err()
+			}
+			outChan <- entities.ExchangeTickers{
+				Exchange: ex,
+				Tickers:  tickers,
+			}
+		}
+	}
 }
