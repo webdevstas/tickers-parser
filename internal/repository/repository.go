@@ -5,6 +5,7 @@ import (
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/updater/exchange"
 	"tickers-parser/pkg/utils"
+	"time"
 
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
@@ -35,6 +36,7 @@ func (r *Repository) SaveTickersForExchange(exchangeId uint, tickers []entities.
 			UpdateAll: true,
 		}).Create(&resultTicker)
 	}
+	r.Exchange.Where("id", exchangeId).UpdateColumn("tickersSavedAt", time.Now())
 	return true, nil
 }
 

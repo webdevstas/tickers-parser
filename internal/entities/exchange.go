@@ -16,6 +16,7 @@ type Exchange struct {
 	Key              string    `json:"key" db:"key"`
 	Name             string    `json:"name,omitempty"`
 	Enabled          bool      `json:"enabled,omitempty"`
+	TickersSavedAt   time.Time `gorm:"column:tickersSavedAt"`
 	TickersFetchable `gorm:"-"`
 }
 

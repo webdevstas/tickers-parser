@@ -62,7 +62,6 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 				t.log.Error(err)
 				return
 			}
-			t.log.Info("tickers for exchange ", tickersResult.Exchange.Key, " saved")
 		}(res)
 	}
 
