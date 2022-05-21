@@ -32,14 +32,23 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	exchanges := t.repository.GetExchangesForTickersUpdate()
 	wg := &sync.WaitGroup{}
 	ctx := context.Background()
-	inpChan := make(chan entities.Exchange)
-	outChan := make(chan entities.ExchangeTickers)
+	var routinesNumber int
 
-	for i := 0; i <= runtime.NumCPU(); i++ {
+	if len(exchanges) < runtime.NumCPU() {
+		routinesNumber = len(exchanges)
+	} else {
+		routinesNumber = runtime.NumCPU()
+	}
+
+	inpChan := make(chan entities.Exchange, routinesNumber)
+	outChan := make(chan entities.ExchangeTickers, routinesNumber)
+	errChan := make(chan error, routinesNumber)
+
+	for i := 0; i <= routinesNumber; i++ {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			worker(ctx, inpChan, outChan)
+			worker(ctx, inpChan, outChan, errChan)
 		}()
 	}
 
@@ -53,19 +62,29 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	go func() {
 		wg.Wait()
 		close(outChan)
+		close(errChan)
 	}()
 
-	for res := range outChan {
-		go func(tickersResult entities.ExchangeTickers) {
-			ok, err := t.repository.SaveTickersForExchange(tickersResult.Exchange.ID, tickersResult.Tickers)
+	for {
+		select {
+		case res, ok := <-outChan:
 			if !ok {
-				t.log.Error(err)
-				return
+				return nil, nil
 			}
-		}(res)
+			go func(tickersResult entities.ExchangeTickers) {
+				ok, err := t.repository.SaveTickersForExchange(tickersResult.Exchange.ID, tickersResult.Tickers)
+				if !ok {
+					t.log.Error(err)
+					return
+				}
+				t.log.Info("saved tickers for ", res.Exchange.Name)
+			}(res)
+		case err := <-errChan:
+			if err != nil {
+				t.log.Error(err)
+			}
+		}
 	}
-
-	return nil, nil
 }
 
 func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) *Tasks {
@@ -79,7 +98,7 @@ func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) 
 	return &t
 }
 
-func worker(ctx context.Context, inpChan chan entities.Exchange, outChan chan entities.ExchangeTickers) {
+func worker(ctx context.Context, inpChan chan entities.Exchange, outChan chan entities.ExchangeTickers, errChan chan error) {
 	for {
 		select {
 		case <-ctx.Done():
@@ -90,7 +109,8 @@ func worker(ctx context.Context, inpChan chan entities.Exchange, outChan chan en
 			}
 			tickers, err := ex.FetchTickers()
 			if err != nil {
-				ctx.Err()
+				errChan <- err
+				return
 			}
 			outChan <- entities.ExchangeTickers{
 				Exchange: ex,
