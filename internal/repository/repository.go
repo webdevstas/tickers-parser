@@ -54,6 +54,8 @@ func (r *Repository) GetExchangesForTickersUpdate() []entities.Exchange {
 			ID:               exchange.ID,
 			Key:              exchange.Key,
 			Name:             exchange.Name,
+			Enabled:          exchange.Enabled,
+			TickersSavedAt:   exchange.TickersSavedAt,
 			TickersFetchable: api,
 		}
 	})

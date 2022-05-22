@@ -24,6 +24,17 @@ type Tasks struct {
 	tickersStore updater.TickersStore
 }
 
+func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) *Tasks {
+	t := Tasks{
+		scheduler:    InitScheduler(l),
+		log:          l,
+		config:       c,
+		repository:   r,
+		tickersStore: updater.NewTickersStoreService(r),
+	}
+	return &t
+}
+
 func (t *Tasks) RunTasks() {
 	t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, false, t.startTickersParsing)
 }
@@ -85,17 +96,6 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 			}
 		}
 	}
-}
-
-func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) *Tasks {
-	t := Tasks{
-		scheduler:    InitScheduler(l),
-		log:          l,
-		config:       c,
-		repository:   r,
-		tickersStore: updater.NewTickersStoreService(r),
-	}
-	return &t
 }
 
 func worker(ctx context.Context, inpChan chan entities.Exchange, outChan chan entities.ExchangeTickers, errChan chan error) {
