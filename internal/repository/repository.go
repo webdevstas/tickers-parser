@@ -17,26 +17,24 @@ type IRepository interface {
 }
 
 type Repository struct {
-	Exchange *gorm.DB
-	Ticker   *gorm.DB
+	Db *gorm.DB
 }
 
 func GetRepository(db *gorm.DB, log logger.Logger) *Repository {
 	return &Repository{
-		Exchange: db.Model(&entities.Exchange{}),
-		Ticker:   db.Model(&entities.Ticker{}),
+		Db: db,
 	}
 }
 
 func (r *Repository) SaveTickersForExchange(exchangeId uint, tickers []entities.ExchangeRawTicker) (bool, error) {
 	for _, ticker := range tickers {
 		resultTicker := RawTickerToEntity(exchangeId, ticker)
-		r.Ticker.Clauses(clause.OnConflict{
+		r.Db.Model(entities.Ticker{}).Clauses(clause.OnConflict{
 			Columns:   []clause.Column{{Name: "baseSymbol"}, {Name: "quoteSymbol"}, {Name: "exchangeId"}},
 			UpdateAll: true,
 		}).Create(&resultTicker)
 	}
-	r.Exchange.Where("id", exchangeId).UpdateColumn("tickersSavedAt", time.Now())
+	r.Db.Model(entities.Exchange{}).Where("id = ?", exchangeId).Update("tickersSavedAt", time.Now())
 	return true, nil
 }
 
@@ -46,8 +44,8 @@ func (r *Repository) GetExchangesForTickersUpdate() []entities.Exchange {
 		"ascendex": exchange.GetAscendex(),
 	}
 
-	var exchanges []entities.Exchange
-	r.Exchange.Where("enabled = true").Find(&exchanges)
+	exchanges := []entities.Exchange{}
+	r.Db.Model(entities.Exchange{}).Where("enabled=?", true).Find(&exchanges)
 	return utils.Map(exchanges, func(exchange entities.Exchange) entities.Exchange {
 		api := ExchangeMapping[exchange.Key]
 		return entities.Exchange{
