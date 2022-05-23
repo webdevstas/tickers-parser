@@ -42,6 +42,7 @@ func (r *Repository) GetExchangesForTickersUpdate() []entities.Exchange {
 
 	var ExchangeMapping = map[string]entities.TickersFetchable{
 		"ascendex": exchange.GetAscendex(),
+		"bitforex": exchange.GetBitforex(),
 	}
 
 	exchanges := []entities.Exchange{}
