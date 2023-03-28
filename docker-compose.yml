@@ -1,0 +1,15 @@
+version: "3"
+services:
+  app:
+    build: ./
+    depends_on:
+      - postgre
+  postgre:
+    image: postgres:10.11
+    container_name: postgre
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=parser
+    ports:
+      - "5432:5432"

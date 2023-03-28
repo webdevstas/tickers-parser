@@ -1,5 +1,5 @@
 postgres:
-  url: 'localhost'
+  url: 'postgre'
   port: '5432'
   user: 'postgres'
   password: 'password'
