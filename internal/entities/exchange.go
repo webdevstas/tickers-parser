@@ -10,12 +10,12 @@ type TickersFetchable interface {
 }
 
 type Exchange struct {
-	ID               uint      `gorm:"primarykey"`
-	CreatedAt        time.Time `gorm:"column:createdAt"`
-	UpdatedAt        time.Time `gorm:"column:updatedAt"`
-	Key              string    `json:"key" db:"key"`
-	Name             string    `json:"name,omitempty"`
-	Enabled          bool      `json:"enabled,omitempty"`
+	ID               uint
+	CreatedAt        time.Time
+	UpdatedAt        time.Time
+	Key              string `json:"key" db:"key"`
+	Name             string `json:"name,omitempty"`
+	Enabled          bool   `json:"enabled,omitempty"`
 	TickersFetchable `gorm:"-"`
 }
 

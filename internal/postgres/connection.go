@@ -2,11 +2,12 @@ package postgres
 
 import (
 	"fmt"
+	"tickers-parser/internal/entities"
+	"tickers-parser/internal/services/logger"
+
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-	"tickers-parser/internal/entities"
-	"tickers-parser/internal/services/logger"
 )
 
 type DbConf struct {
@@ -35,7 +36,7 @@ func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*gorm.DB, err
 
 	logger.Info("Connection with Postgres succeed")
 
-	err = db.AutoMigrate(&entities.Exchange{}, &entities.Ticker{}) // For development only
+	err = db.AutoMigrate(&entities.Exchange{}, &entities.Ticker{}, &entities.Coin{}) // For development only
 
 	if err != nil {
 		logger.Error(err)

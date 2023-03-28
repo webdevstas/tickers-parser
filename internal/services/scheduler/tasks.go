@@ -1,13 +1,14 @@
 package scheduler
 
 import (
-	"github.com/spf13/viper"
 	"runtime"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/updater"
 	"tickers-parser/internal/types"
+
+	"github.com/spf13/viper"
 )
 
 type ITasks interface {
@@ -23,7 +24,8 @@ type Tasks struct {
 }
 
 func (t *Tasks) RunTasks() {
-	t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, false, t.startTickersParsing)
+	go t.scheduler.ScheduleRecurrentTask("prices", 0.5*60*1000, false, t.StartPriceCalculation)
+	go t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, false, t.startTickersParsing)
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
@@ -85,6 +87,16 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 				runtime.Gosched()
 			}
 		}
+	}
+	return nil, nil
+}
+
+func (t *Tasks) StartPriceCalculation(args ...interface{}) (interface{}, error) {
+	coins := t.repository.GetEnabledCoins()
+	for _, coin := range coins {
+		tickers := t.repository.GetTickersForCoin(&coin)
+		coin.CalculatePrice(tickers)
+		t.repository.SaveCoin(&coin)
 	}
 	return nil, nil
 }

@@ -1,6 +1,7 @@
 package scheduler
 
 import (
+	"runtime"
 	"strconv"
 	"tickers-parser/internal/services/logger"
 	"time"
@@ -48,6 +49,7 @@ func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFir
 			if err != nil {
 				s.Logger.Error(err)
 			}
+			runtime.Gosched()
 		}()
 	}
 }

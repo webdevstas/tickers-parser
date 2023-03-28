@@ -1,9 +1,18 @@
 version: "3"
 services:
   app:
-    build: ./
+    image: golang:1.18-alpine
+    working_dir: /app
+    volumes:
+      - ./:/app
     depends_on:
       - postgre
+    environment:
+      - GO111MODULE=on
+      - CGO_ENABLED=1
+      - GOOS=linux
+      - GOARCH=amd64
+    command: go run /app/cmd/app/parser.go
   postgre:
     image: postgres:10.11
     container_name: postgre
