@@ -24,8 +24,9 @@ type Tasks struct {
 }
 
 func (t *Tasks) RunTasks() {
-	go t.scheduler.ScheduleRecurrentTask("prices", 0.5*60*1000, false, t.StartPriceCalculation)
-	go t.scheduler.ScheduleRecurrentTask("tickers", t.config.GetInt("app.tickersInterval")*60*1000, false, t.startTickersParsing)
+	schedule := t.scheduler.ScheduleRecurrentTask
+	go schedule("prices", t.config.GetFloat64("app.pricesInterval")*60*1000, false, t.StartPriceCalculation)
+	go schedule("tickers", t.config.GetFloat64("app.tickersInterval")*60*1000, false, t.startTickersParsing)
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {

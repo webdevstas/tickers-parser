@@ -32,7 +32,7 @@ func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interfac
 	return res, nil
 }
 
-func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{}) {
+func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs float64, ignoreFirstRun bool, function TaskFunction, args ...interface{}) {
 	t := time.NewTicker(time.Duration(intervalMs) * time.Millisecond)
 	defer t.Stop()
 	if !ignoreFirstRun {
