@@ -2,12 +2,15 @@ package postgres
 
 import (
 	"fmt"
+	"log"
+	"os"
 	"tickers-parser/internal/entities"
-	"tickers-parser/internal/services/logger"
+	"time"
 
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
+	"gorm.io/gorm/logger"
 )
 
 type DbConf struct {
@@ -18,8 +21,14 @@ type DbConf struct {
 	password string
 }
 
-func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*gorm.DB, error) {
-
+func ConnectToPostgres(config *viper.Viper) (*gorm.DB, error) {
+	dbLogger := logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
+		logger.Config{
+			SlowThreshold:             time.Second, // Slow SQL threshold
+			LogLevel:                  logger.Info, // Log level
+			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
+			Colorful:                  false,       // Disable color
+		})
 	var conf = DbConf{
 		host:     config.GetString("postgres.url"),
 		port:     config.GetString("postgres.port"),
@@ -28,18 +37,11 @@ func ConnectToPostgres(config *viper.Viper, logger logger.Logger) (*gorm.DB, err
 		password: config.GetString("postgres.password"),
 	}
 
-	db, err := gorm.Open(postgres.Open(fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Europe/Moscow", conf.host, conf.user, conf.password, conf.dbname, conf.port)))
+	db, _ := gorm.Open(postgres.Open(fmt.Sprintf("host=%v user=%v password=%v dbname=%v port=%v sslmode=disable TimeZone=Europe/Moscow", conf.host, conf.user, conf.password, conf.dbname, conf.port)), &gorm.Config{
+		Logger: dbLogger,
+	})
 
-	if err != nil {
-		logger.Error(err)
-	}
+	db.AutoMigrate(&entities.Exchange{}, &entities.Ticker{}, &entities.Coin{}) // For development only
 
-	logger.Info("Connection with Postgres succeed")
-
-	err = db.AutoMigrate(&entities.Exchange{}, &entities.Ticker{}, &entities.Coin{}) // For development only
-
-	if err != nil {
-		logger.Error(err)
-	}
 	return db, nil
 }

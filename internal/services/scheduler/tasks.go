@@ -7,6 +7,7 @@ import (
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/updater"
 	"tickers-parser/internal/types"
+	"tickers-parser/pkg/utils"
 
 	"github.com/spf13/viper"
 )
@@ -19,7 +20,7 @@ type Tasks struct {
 	scheduler    *Scheduler
 	log          logger.Logger
 	config       *viper.Viper
-	repository   repository.IRepository
+	repository   types.IRepository
 	tickersStore updater.TickersStore
 }
 
@@ -27,6 +28,7 @@ func (t *Tasks) RunTasks() {
 	schedule := t.scheduler.ScheduleRecurrentTask
 	go schedule("prices", t.config.GetFloat64("app.pricesInterval")*60*1000, false, t.StartPriceCalculation)
 	go schedule("tickers", t.config.GetFloat64("app.tickersInterval")*60*1000, false, t.startTickersParsing)
+	go schedule("tickers-link", t.config.GetFloat64("app.pricesInterval")*60*1000, false, t.LinkTickersToCoins)
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
@@ -94,11 +96,37 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 
 func (t *Tasks) StartPriceCalculation(args ...interface{}) (interface{}, error) {
 	coins := t.repository.GetEnabledCoins()
+	coinsMap := utils.GetCoinsMap(t.repository)
+
 	for _, coin := range coins {
 		tickers := t.repository.GetTickersForCoin(&coin)
-		coin.CalculatePrice(tickers)
-		t.repository.SaveCoin(&coin)
+		coin.CalculatePrice(tickers, coinsMap)
+		t.repository.UpdateCoin(&coin)
 	}
+	return nil, nil
+}
+
+func (t *Tasks) LinkTickersToCoins(args ...interface{}) (interface{}, error) {
+	tickers := t.repository.GetAllTickers()
+	coinsMap := utils.GetCoinsMap(t.repository)
+
+	for _, ticker := range tickers {
+		baseCoin, foundBase := coinsMap[ticker.BaseSymbol]
+
+		quoteCoin, foundQuote := coinsMap[ticker.QuoteSymbol]
+
+		if foundBase {
+			ticker.BaseCoinID = baseCoin.ID
+		}
+		if foundQuote {
+			ticker.QuoteCoinID = quoteCoin.ID
+		}
+
+		if foundBase || foundQuote {
+			t.repository.UpdateTicker(&ticker)
+		}
+	}
+
 	return nil, nil
 }
 

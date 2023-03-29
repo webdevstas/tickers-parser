@@ -16,12 +16,25 @@ type Coin struct {
 	Min       float64
 }
 
-func (c *Coin) CalculatePrice(tickers []Ticker) {
-	var sum, volume float64 = 0, 0
-	for _, ticker := range tickers {
-		sum += (ticker.Last * ticker.Volume)
-		volume += ticker.Volume
+func (c *Coin) CalculatePrice(tickers []Ticker, usdtCoins map[string]Coin) {
+	if len(tickers) == 0 {
+		return
 	}
-	c.Price = sum / volume
-	c.Volume = volume
+
+	var price, volume float64
+
+	for _, ticker := range tickers {
+		if ticker.QuoteSymbol == "USDT" || ticker.QuoteSymbol == "USD" {
+			price += (ticker.Last * ticker.Volume)
+			volume += ticker.Volume
+		} else if usdtCoin := usdtCoins[ticker.QuoteSymbol]; usdtCoin.Price > 0 {
+			price += ((ticker.Last * ticker.Volume) * usdtCoin.Price)
+			volume += ticker.Volume
+		}
+	}
+
+	if price > 0 && volume > 0 {
+		c.Price = price / volume
+		c.Volume = volume
+	}
 }

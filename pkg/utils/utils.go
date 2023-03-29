@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"tickers-parser/internal/entities"
 )
 
 func FetchJson[T any](url string, link T) error {
@@ -54,7 +55,7 @@ func Filter[T comparable](iterable []T, cb func(el T) bool) []T {
 	return res
 }
 
-func Reduce[T comparable](iterable []T, cb func(acc T, cur T) T, initVal T) T {
+func Reduce[T, K any](iterable []T, cb func(K, T) K, initVal K) K {
 	res := initVal
 
 	for _, el := range iterable {
@@ -62,4 +63,23 @@ func Reduce[T comparable](iterable []T, cb func(acc T, cur T) T, initVal T) T {
 	}
 
 	return res
+}
+
+func RawTickerToEntity(exchangeId uint, rawTicker entities.ExchangeRawTicker) entities.Ticker {
+	return entities.Ticker{
+		BaseSymbol:   rawTicker.BaseSymbol,
+		QuoteSymbol:  rawTicker.QuoteSymbol,
+		Volume:       rawTicker.Volume,
+		Bid:          rawTicker.Bid,
+		Ask:          rawTicker.Ask,
+		Open:         rawTicker.Open,
+		High:         rawTicker.High,
+		Low:          rawTicker.Low,
+		Change:       rawTicker.Change,
+		ExchangeID:   exchangeId,
+		BaseAddress:  rawTicker.BaseAddress,
+		QuoteAddress: rawTicker.QuoteAddress,
+		Enabled:      false,
+		Last:         rawTicker.Last,
+	}
 }

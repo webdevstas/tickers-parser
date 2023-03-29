@@ -5,7 +5,7 @@ import (
 )
 
 type Ticker struct {
-	ID           uint
+	ID           uint `gorm:"primaryKey"`
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 	BaseSymbol   string `json:"baseSymbol" gorm:"index:ticker_idx,unique;"`
@@ -17,11 +17,12 @@ type Ticker struct {
 	High         float64
 	Low          float64
 	Change       float64
-	ExchangeId   uint   `json:"exchangeId" gorm:"index:ticker_idx,unique;"`
-	BaseCoinId   int    `json:"baseCoinId"`
-	QuoteCoinId  int    `json:"quoteCoinId"`
-	BaseAddress  string `json:"baseAddress"`
-	QuoteAddress string `json:"quoteAddress"`
+	ExchangeID   uint     `json:"exchangeId" gorm:"index:ticker_idx,unique;"`
+	BaseCoinID   uint     `json:"baseCoinId" gorm:"index:base_coin_idx;"`
+	QuoteCoinID  uint     `json:"quoteCoinId" gorm:"index:quote_coin_idx;"`
+	Exchange     Exchange `gorm:"foreignKey:ExchangeID"`
+	BaseAddress  string   `json:"baseAddress"`
+	QuoteAddress string   `json:"quoteAddress"`
 	Enabled      bool
 	Last         float64
 }
