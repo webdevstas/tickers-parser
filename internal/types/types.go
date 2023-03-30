@@ -21,13 +21,14 @@ type IRepository interface {
 type ITickerRepository interface {
 	GetTickersForCoin(coin *entities.Coin) []entities.Ticker
 	GetAllTickers() []entities.Ticker
-	SaveTickersForExchange(exchangeId uint, tickers []entities.ExchangeRawTicker) (bool, error)
+	SaveTickersForExchange(exchangeId uint, tickers []entities.Ticker) (bool, error)
 	UpdateTicker(ticker *entities.Ticker)
 }
 
 type ICoinRepository interface {
 	GetEnabledCoins() []entities.Coin
 	UpdateCoin(coin *entities.Coin)
+	InsertCoins([]entities.Coin)
 }
 
 type IExchangeRepository interface {

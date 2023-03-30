@@ -6,9 +6,9 @@ type Coin struct {
 	ID        uint
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	Key       string
+	Key       string `gorm:"index:coin_key_idx,unique"`
 	Name      string
-	Symbol    string
+	Symbol    string `gorm:"index:coin_symbol_idx,unique"`
 	Enabled   bool
 	Price     float64
 	Volume    float64

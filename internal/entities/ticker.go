@@ -26,3 +26,22 @@ type Ticker struct {
 	Enabled      bool
 	Last         float64
 }
+
+func (t *Ticker) LinkTickerToCoins(coins map[string]Coin) bool {
+	baseCoin, foundBase := coins[t.BaseSymbol]
+	quoteCoin, foundQuote := coins[t.QuoteSymbol]
+
+	if foundBase {
+		t.BaseCoinID = baseCoin.ID
+	}
+
+	if foundQuote {
+		t.QuoteCoinID = quoteCoin.ID
+	}
+
+	if foundBase || foundQuote {
+		return true
+	}
+
+	return false
+}

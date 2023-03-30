@@ -3,6 +3,8 @@ package repository
 import (
 	"tickers-parser/internal/entities"
 	"time"
+
+	"gorm.io/gorm/clause"
 )
 
 func (r *Repository) GetEnabledCoins() []entities.Coin {
@@ -11,7 +13,11 @@ func (r *Repository) GetEnabledCoins() []entities.Coin {
 	return result
 }
 
-func (r Repository) UpdateCoin(coin *entities.Coin) {
+func (r *Repository) UpdateCoin(coin *entities.Coin) {
 	coin.UpdatedAt = time.Now()
 	r.Coin(true).Where("id = ?", coin.ID).UpdateColumns(coin)
+}
+
+func (r *Repository) InsertCoins(coins []entities.Coin) {
+	r.Coin(true).Clauses(clause.OnConflict{Columns: []clause.Column{{Name: "symbol"}}, DoNothing: true}).Create(&coins)
 }

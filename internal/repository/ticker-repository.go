@@ -6,18 +6,14 @@ import (
 	"time"
 
 	"gorm.io/gorm/clause"
-
-	"tickers-parser/pkg/utils"
 )
 
-func (r *Repository) SaveTickersForExchange(exchangeId uint, tickers []entities.ExchangeRawTicker) (bool, error) {
-	for _, ticker := range tickers {
-		resultTicker := utils.RawTickerToEntity(exchangeId, ticker)
-		r.Ticker(true).Clauses(clause.OnConflict{
-			Columns:   []clause.Column{{Name: "base_symbol"}, {Name: "quote_symbol"}, {Name: "exchange_id"}},
-			DoUpdates: clause.AssignmentColumns([]string{"volume", "bid", "ask", "open", "high", "low", "last", "created_at", "updated_at"}),
-		}).Create(&resultTicker)
-	}
+func (r *Repository) SaveTickersForExchange(exchangeId uint, tickers []entities.Ticker) (bool, error) {
+	r.Ticker(true).Clauses(clause.OnConflict{
+		Columns:   []clause.Column{{Name: "base_symbol"}, {Name: "quote_symbol"}, {Name: "exchange_id"}},
+		DoUpdates: clause.AssignmentColumns([]string{"volume", "bid", "ask", "open", "high", "low", "last", "created_at", "updated_at"}),
+	}).Create(&tickers)
+
 	return true, nil
 }
 

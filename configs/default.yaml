@@ -5,6 +5,7 @@ postgres:
   password: 'password'
   database: 'parser'
 app:
-  dataRoot: 'data'
   tickersInterval: 1 #min
-  pricesInterval: 0.5 #min
+  pricesInterval: 1 
+  coinParseInterval: 60
+  tickersLinkInterval: 60

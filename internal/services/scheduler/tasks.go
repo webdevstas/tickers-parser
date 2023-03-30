@@ -17,18 +17,18 @@ type ITasks interface {
 }
 
 type Tasks struct {
-	scheduler    *Scheduler
-	log          logger.Logger
-	config       *viper.Viper
-	repository   types.IRepository
-	tickersStore updater.TickersStore
+	scheduler  *Scheduler
+	log        logger.Logger
+	config     *viper.Viper
+	repository types.IRepository
 }
 
 func (t *Tasks) RunTasks() {
 	schedule := t.scheduler.ScheduleRecurrentTask
 	go schedule("prices", t.config.GetFloat64("app.pricesInterval")*60*1000, false, t.StartPriceCalculation)
 	go schedule("tickers", t.config.GetFloat64("app.tickersInterval")*60*1000, false, t.startTickersParsing)
-	go schedule("tickers-link", t.config.GetFloat64("app.pricesInterval")*60*1000, false, t.LinkTickersToCoins)
+	go schedule("tickers-link", t.config.GetFloat64("app.tickersLinkInterval")*60*1000, false, t.LinkTickersToCoins)
+	go schedule("coins-parse", t.config.GetFloat64("app.coinParseInterval")*60*1000, false, t.ParseCoins)
 }
 
 func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
@@ -74,7 +74,12 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		case result := <-tickersChannels.DataChannel:
 			tickers := result
 			go func(channels types.ChannelsPair[interface{}]) {
-				res, err := t.tickersStore.SaveTickersForExchange(tickers.Exchange.ID, tickers.Tickers)
+
+				tickerEntities := utils.Map(tickers.Tickers, func(el entities.ExchangeRawTicker) entities.Ticker {
+					return utils.RawTickerToEntity(tickers.Exchange.ID, el)
+				})
+
+				res, err := t.repository.SaveTickersForExchange(tickers.Exchange.ID, tickerEntities)
 				if err != nil {
 					channels.CancelChannel <- err
 				} else {
@@ -111,18 +116,7 @@ func (t *Tasks) LinkTickersToCoins(args ...interface{}) (interface{}, error) {
 	coinsMap := utils.GetCoinsMap(t.repository)
 
 	for _, ticker := range tickers {
-		baseCoin, foundBase := coinsMap[ticker.BaseSymbol]
-
-		quoteCoin, foundQuote := coinsMap[ticker.QuoteSymbol]
-
-		if foundBase {
-			ticker.BaseCoinID = baseCoin.ID
-		}
-		if foundQuote {
-			ticker.QuoteCoinID = quoteCoin.ID
-		}
-
-		if foundBase || foundQuote {
+		if ticker.LinkTickerToCoins(coinsMap) {
 			t.repository.UpdateTicker(&ticker)
 		}
 	}
@@ -130,13 +124,28 @@ func (t *Tasks) LinkTickersToCoins(args ...interface{}) (interface{}, error) {
 	return nil, nil
 }
 
+func (t *Tasks) ParseCoins(args ...interface{}) (interface{}, error) {
+	coins := updater.ParseCoinsFromCryptorank()
+	chunkLength := 1000
+	done := 0
+
+	for i := chunkLength; i <= len(coins); i += chunkLength {
+		if i >= len(coins) {
+			i = len(coins)
+		}
+		t.repository.InsertCoins(coins[done:i])
+		done += chunkLength
+	}
+
+	return nil, nil
+}
+
 func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) *Tasks {
 	t := Tasks{
-		scheduler:    InitScheduler(l),
-		log:          l,
-		config:       c,
-		repository:   r,
-		tickersStore: updater.NewTickersStoreService(r),
+		scheduler:  InitScheduler(l),
+		log:        l,
+		config:     c,
+		repository: r,
 	}
 	return &t
 }

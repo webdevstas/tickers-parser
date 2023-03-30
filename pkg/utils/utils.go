@@ -79,7 +79,7 @@ func RawTickerToEntity(exchangeId uint, rawTicker entities.ExchangeRawTicker) en
 		ExchangeID:   exchangeId,
 		BaseAddress:  rawTicker.BaseAddress,
 		QuoteAddress: rawTicker.QuoteAddress,
-		Enabled:      false,
+		Enabled:      true,
 		Last:         rawTicker.Last,
 	}
 }
