@@ -4,7 +4,7 @@ import (
 	"strconv"
 	"strings"
 	"tickers-parser/internal/entities"
-	"tickers-parser/pkg/utils"
+	http_client "tickers-parser/internal/services/http-client"
 )
 
 type ascendex struct {
@@ -32,10 +32,10 @@ type ascendexResponse struct {
 	Data []ascendexTicker `json:"data"`
 }
 
-func (a ascendex) FetchTickers() ([]entities.ExchangeRawTicker, error) {
+func (a ascendex) FetchTickers(http *http_client.HttpClient) ([]entities.ExchangeRawTicker, error) {
 	tickersUrl := "https://ascendex.com/api/pro/v1/ticker"
 	var response ascendexResponse
-	err := utils.FetchJson(tickersUrl, &response)
+	err := http.FetchJson(tickersUrl, &response)
 
 	if err != nil {
 		return nil, err

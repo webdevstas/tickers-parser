@@ -6,7 +6,7 @@ import (
 	"sync"
 	"testing"
 	"tickers-parser/internal/services/logger"
-	"tickers-parser/internal/types"
+	"tickers-parser/pkg/utils"
 )
 
 func getService() *Scheduler {
@@ -43,7 +43,7 @@ func TestScheduler_RunTask(t *testing.T) {
 }
 
 func TestScheduler_ScheduleRecurrentTaskSucceed(t *testing.T) {
-	channels := types.ChannelsPair[interface{}]{
+	channels := utils.ChannelsPair[interface{}]{
 		DataChannel:   make(chan interface{}),
 		CancelChannel: make(chan error),
 	}
@@ -51,7 +51,7 @@ func TestScheduler_ScheduleRecurrentTaskSucceed(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	succeedFunc := func(args ...interface{}) (interface{}, error) {
-		channels, ok := args[0].(types.ChannelsPair[interface{}])
+		channels, ok := args[0].(utils.ChannelsPair[interface{}])
 		wg := args[1].(*sync.WaitGroup)
 		if !ok {
 			t.Error(errors.New("wrong argument for channels pair"))
@@ -71,7 +71,7 @@ func TestScheduler_ScheduleRecurrentTaskSucceed(t *testing.T) {
 }
 
 func TestScheduler_ScheduleRecurrentTaskErrored(t *testing.T) {
-	channels := types.ChannelsPair[interface{}]{
+	channels := utils.ChannelsPair[interface{}]{
 		DataChannel:   make(chan interface{}),
 		CancelChannel: make(chan error),
 	}
@@ -79,7 +79,7 @@ func TestScheduler_ScheduleRecurrentTaskErrored(t *testing.T) {
 	var wg sync.WaitGroup
 	wg.Add(1)
 	succeedFunc := func(args ...interface{}) (interface{}, error) {
-		channels, ok := args[0].(types.ChannelsPair[interface{}])
+		channels, ok := args[0].(utils.ChannelsPair[interface{}])
 		wg := args[1].(*sync.WaitGroup)
 		if !ok {
 			t.Error(errors.New("wrong argument for channels pair"))

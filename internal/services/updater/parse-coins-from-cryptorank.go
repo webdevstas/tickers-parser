@@ -2,6 +2,7 @@ package updater
 
 import (
 	"tickers-parser/internal/entities"
+	http_client "tickers-parser/internal/services/http-client"
 	"tickers-parser/pkg/utils"
 )
 
@@ -16,10 +17,10 @@ type response struct {
 	Data []CryptorankCoin `json:"data"`
 }
 
-func ParseCoinsFromCryptorank() []entities.Coin {
+func ParseCoinsFromCryptorank(http *http_client.HttpClient) []entities.Coin {
 	var response response
 	url := "https://api.cryptorank.io/v0/coins"
-	utils.FetchJson(url, &response)
+	http.FetchJson(url, &response)
 	coins := response.Data
 
 	return utils.Map(coins, func(el CryptorankCoin) entities.Coin {

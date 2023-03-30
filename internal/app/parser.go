@@ -1,14 +1,16 @@
 package app
 
 import (
-	"go.uber.org/fx"
-	"go.uber.org/fx/fxevent"
 	"os"
 	"tickers-parser/internal/postgres"
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/services/config"
+	http_client "tickers-parser/internal/services/http-client"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/scheduler"
+
+	"go.uber.org/fx"
+	"go.uber.org/fx/fxevent"
 )
 
 func Register(s *scheduler.Tasks) {
@@ -22,6 +24,7 @@ func StartParserApp() {
 			config.InitConfigModule,
 			postgres.ConnectToPostgres,
 			repository.GetRepository,
+			http_client.GetHttpClient,
 			scheduler.NewTasksService,
 		),
 		fx.Invoke(Register),

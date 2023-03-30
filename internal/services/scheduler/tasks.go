@@ -4,9 +4,9 @@ import (
 	"runtime"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/repository"
+	http_client "tickers-parser/internal/services/http-client"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/updater"
-	"tickers-parser/internal/types"
 	"tickers-parser/pkg/utils"
 
 	"github.com/spf13/viper"
@@ -20,7 +20,8 @@ type Tasks struct {
 	scheduler  *Scheduler
 	log        logger.Logger
 	config     *viper.Viper
-	repository types.IRepository
+	repository repository.IRepository
+	httpClient *http_client.HttpClient
 }
 
 func (t *Tasks) RunTasks() {
@@ -35,12 +36,12 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	exchanges := t.repository.GetExchangesForTickersUpdate()
 	exchangesCount := len(exchanges)
 
-	tickersChannels := types.ChannelsPair[entities.ExchangeTickers]{
+	tickersChannels := utils.ChannelsPair[entities.ExchangeTickers]{
 		DataChannel:   make(chan entities.ExchangeTickers, exchangesCount),
 		CancelChannel: make(chan error, exchangesCount),
 	}
 
-	saveChannels := types.ChannelsPair[interface{}]{
+	saveChannels := utils.ChannelsPair[interface{}]{
 		CancelChannel: make(chan error, exchangesCount),
 		DataChannel:   make(chan interface{}, exchangesCount),
 	}
@@ -52,11 +53,11 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 	}()
 
 	for _, ex := range exchanges {
-		go func(exchange entities.Exchange, channels types.ChannelsPair[entities.ExchangeTickers]) {
+		go func(exchange entities.Exchange, channels utils.ChannelsPair[entities.ExchangeTickers]) {
 			exchangeTickers := entities.ExchangeTickers{
 				Exchange: exchange,
 			}
-			res, err := exchange.FetchTickers()
+			res, err := exchange.FetchTickers(t.httpClient)
 			if err != nil {
 				channels.CancelChannel <- err
 				return
@@ -73,8 +74,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 			continue
 		case result := <-tickersChannels.DataChannel:
 			tickers := result
-			go func(channels types.ChannelsPair[interface{}]) {
-
+			go func(channels utils.ChannelsPair[interface{}]) {
 				tickerEntities := utils.Map(tickers.Tickers, func(el entities.ExchangeRawTicker) entities.Ticker {
 					return utils.RawTickerToEntity(tickers.Exchange.ID, el)
 				})
@@ -101,7 +101,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 
 func (t *Tasks) StartPriceCalculation(args ...interface{}) (interface{}, error) {
 	coins := t.repository.GetEnabledCoins()
-	coinsMap := utils.GetCoinsMap(t.repository)
+	coinsMap := utils.GetCoinsMap(coins)
 
 	for _, coin := range coins {
 		tickers := t.repository.GetTickersForCoin(&coin)
@@ -113,7 +113,8 @@ func (t *Tasks) StartPriceCalculation(args ...interface{}) (interface{}, error) 
 
 func (t *Tasks) LinkTickersToCoins(args ...interface{}) (interface{}, error) {
 	tickers := t.repository.GetAllTickers()
-	coinsMap := utils.GetCoinsMap(t.repository)
+	coins := t.repository.GetEnabledCoins()
+	coinsMap := utils.GetCoinsMap(coins)
 
 	for _, ticker := range tickers {
 		if ticker.LinkTickerToCoins(coinsMap) {
@@ -125,7 +126,7 @@ func (t *Tasks) LinkTickersToCoins(args ...interface{}) (interface{}, error) {
 }
 
 func (t *Tasks) ParseCoins(args ...interface{}) (interface{}, error) {
-	coins := updater.ParseCoinsFromCryptorank()
+	coins := updater.ParseCoinsFromCryptorank(t.httpClient)
 	chunkLength := 1000
 	done := 0
 
@@ -140,12 +141,12 @@ func (t *Tasks) ParseCoins(args ...interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository) *Tasks {
-	t := Tasks{
+func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository, h *http_client.HttpClient) *Tasks {
+	return &Tasks{
 		scheduler:  InitScheduler(l),
 		log:        l,
 		config:     c,
 		repository: r,
+		httpClient: h,
 	}
-	return &t
 }

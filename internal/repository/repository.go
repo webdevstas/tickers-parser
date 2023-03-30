@@ -8,6 +8,12 @@ import (
 	"gorm.io/gorm"
 )
 
+type IRepository interface {
+	IExchangeRepository
+	ITickerRepository
+	ICoinRepository
+}
+
 type repositoryFunc func(new bool) *gorm.DB
 
 type Repository struct {

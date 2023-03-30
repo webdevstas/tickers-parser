@@ -7,6 +7,12 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+type ICoinRepository interface {
+	GetEnabledCoins() []entities.Coin
+	UpdateCoin(coin *entities.Coin)
+	InsertCoins([]entities.Coin)
+}
+
 func (r *Repository) GetEnabledCoins() []entities.Coin {
 	var result []entities.Coin
 	r.Coin(true).Where("enabled = true").Find(&result)

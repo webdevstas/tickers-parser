@@ -2,11 +2,12 @@ package entities
 
 import (
 	"fmt"
+	http_client "tickers-parser/internal/services/http-client"
 	"time"
 )
 
 type TickersFetchable interface {
-	FetchTickers() ([]ExchangeRawTicker, error)
+	FetchTickers(http *http_client.HttpClient) ([]ExchangeRawTicker, error)
 }
 
 type Exchange struct {
@@ -39,9 +40,9 @@ type ExchangeRawTicker struct {
 	Open         float64
 }
 
-func (e *Exchange) FetchTickers() ([]ExchangeRawTicker, error) {
+func (e *Exchange) FetchTickers(http *http_client.HttpClient) ([]ExchangeRawTicker, error) {
 	if e.TickersFetchable == nil {
 		return nil, fmt.Errorf("not implemented fetch tickers method for exchange %v", e.Key)
 	}
-	return e.TickersFetchable.FetchTickers()
+	return e.TickersFetchable.FetchTickers(http)
 }

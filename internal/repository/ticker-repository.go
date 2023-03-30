@@ -8,6 +8,13 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+type ITickerRepository interface {
+	GetTickersForCoin(coin *entities.Coin) []entities.Ticker
+	GetAllTickers() []entities.Ticker
+	SaveTickersForExchange(exchangeId uint, tickers []entities.Ticker) (bool, error)
+	UpdateTicker(ticker *entities.Ticker)
+}
+
 func (r *Repository) SaveTickersForExchange(exchangeId uint, tickers []entities.Ticker) (bool, error) {
 	r.Ticker(true).Clauses(clause.OnConflict{
 		Columns:   []clause.Column{{Name: "base_symbol"}, {Name: "quote_symbol"}, {Name: "exchange_id"}},
