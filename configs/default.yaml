@@ -10,5 +10,5 @@ app:
   coinParseInterval: 60
   tickersLinkInterval: 60
 logger:
-  sqlLoggerLogLevel: 2 # 1: Silent,2: Error, 3: Warn, 4: Info
+  sqlLoggerLogLevel: 3 # 1: Silent,2: Error, 3: Warn, 4: Info
   appLoggerLogLevel: 4

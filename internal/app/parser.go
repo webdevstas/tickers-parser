@@ -20,13 +20,13 @@ func Register(s *scheduler.Tasks) {
 func StartParserApp() {
 	app := fx.New(
 		fx.Provide(
-			logger.NewLogger,
 			config.InitConfigModule,
+			logger.NewLogger,
 			postgres.ConnectToPostgres,
 			repository.GetRepository,
 			http_client.GetHttpClient,
-			scheduler.NewTasksService,
 			scheduler.InitScheduler,
+			scheduler.NewTasksService,
 		),
 		fx.Invoke(Register),
 		fx.WithLogger(
