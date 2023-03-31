@@ -5,12 +5,14 @@ import (
 	"fmt"
 	"sync"
 	"testing"
+	"tickers-parser/internal/services/config"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/pkg/utils"
 )
 
 func getService() *Scheduler {
-	log := logger.NewLogger()
+	config := config.InitConfigModule()
+	log := logger.NewLogger(config)
 	s := InitScheduler(log)
 	return s
 }

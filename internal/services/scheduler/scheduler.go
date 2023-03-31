@@ -11,11 +11,11 @@ type TaskFunction func(args ...interface{}) (interface{}, error)
 
 type IScheduler interface {
 	RunTask(name string, function TaskFunction, args ...interface{}) (interface{}, error)
-	ScheduleRecurrentTask(name string, intervalMs int, ignoreFirstRun bool, function TaskFunction, args ...interface{})
+	ScheduleRecurrentTask(name string, intervalMs float64, ignoreFirstRun bool, function TaskFunction, args ...interface{})
 }
 
 type Scheduler struct {
-	Logger logger.Logger
+	Logger *logger.Logger
 }
 
 func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) (interface{}, error) {
@@ -54,6 +54,6 @@ func (s *Scheduler) ScheduleRecurrentTask(name string, intervalMs float64, ignor
 	}
 }
 
-func InitScheduler(l logger.Logger) *Scheduler {
+func InitScheduler(l *logger.Logger) *Scheduler {
 	return &Scheduler{Logger: l}
 }

@@ -1,12 +1,14 @@
 package logger
 
 import (
-	"github.com/sirupsen/logrus"
 	"os"
+	"tickers-parser/internal/services/config"
 	"time"
+
+	"github.com/sirupsen/logrus"
 )
 
-type Logger interface {
+type ILogger interface {
 	Print(v ...interface{})
 	Info(v ...interface{})
 	Warn(v ...interface{})
@@ -15,9 +17,14 @@ type Logger interface {
 	Printf(format string, args ...interface{})
 }
 
-func NewLogger() Logger {
-	logger := logrus.New()
-	logger.SetFormatter(&logrus.TextFormatter{
+type Logger struct {
+	*logrus.Logger
+}
+
+func NewLogger(c *config.Config) *Logger {
+	logr := logrus.New()
+	logr.Level = logrus.Level(c.GetInt32("logger.appLoggerLogLevel"))
+	logr.SetFormatter(&logrus.TextFormatter{
 		ForceColors:               true,
 		DisableColors:             false,
 		ForceQuote:                false,
@@ -34,6 +41,8 @@ func NewLogger() Logger {
 		FieldMap:                  nil,
 		CallerPrettyfier:          nil,
 	})
-	logger.SetOutput(os.Stdout)
-	return logger
+	logr.SetOutput(os.Stdout)
+	return &Logger{
+		logr,
+	}
 }

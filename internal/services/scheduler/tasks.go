@@ -4,12 +4,11 @@ import (
 	"runtime"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/repository"
+	"tickers-parser/internal/services/config"
 	http_client "tickers-parser/internal/services/http-client"
 	"tickers-parser/internal/services/logger"
 	"tickers-parser/internal/services/updater"
 	"tickers-parser/pkg/utils"
-
-	"github.com/spf13/viper"
 )
 
 type ITasks interface {
@@ -17,9 +16,9 @@ type ITasks interface {
 }
 
 type Tasks struct {
-	scheduler  *Scheduler
-	log        logger.Logger
-	config     *viper.Viper
+	scheduler  IScheduler
+	config     config.IConfigService
+	log        logger.ILogger
 	repository repository.IRepository
 	httpClient *http_client.HttpClient
 }
@@ -105,14 +104,15 @@ func (t *Tasks) StartPriceCalculation(args ...interface{}) (interface{}, error) 
 
 	for _, coin := range coins {
 		tickers := t.repository.GetTickersForCoin(&coin)
-		coin.CalculatePrice(tickers, coinsMap)
-		t.repository.UpdateCoin(&coin)
+		if coin.CalculatePrice(tickers, coinsMap) {
+			t.repository.UpdateCoin(&coin)
+		}
 	}
 	return nil, nil
 }
 
 func (t *Tasks) LinkTickersToCoins(args ...interface{}) (interface{}, error) {
-	tickers := t.repository.GetAllTickers()
+	tickers := t.repository.GetUnlinkedTickers()
 	coins := t.repository.GetEnabledCoins()
 	coinsMap := utils.GetCoinsMap(coins)
 
@@ -141,9 +141,9 @@ func (t *Tasks) ParseCoins(args ...interface{}) (interface{}, error) {
 	return nil, nil
 }
 
-func NewTasksService(l logger.Logger, c *viper.Viper, r *repository.Repository, h *http_client.HttpClient) *Tasks {
+func NewTasksService(l *logger.Logger, c *config.Config, r *repository.Repository, h *http_client.HttpClient, s *Scheduler) *Tasks {
 	return &Tasks{
-		scheduler:  InitScheduler(l),
+		scheduler:  s,
 		log:        l,
 		config:     c,
 		repository: r,

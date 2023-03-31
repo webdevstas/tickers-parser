@@ -5,9 +5,9 @@ import (
 	"log"
 	"os"
 	"tickers-parser/internal/entities"
+	"tickers-parser/internal/services/config"
 	"time"
 
-	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -21,13 +21,13 @@ type DbConf struct {
 	password string
 }
 
-func ConnectToPostgres(config *viper.Viper) (*gorm.DB, error) {
+func ConnectToPostgres(config *config.Config) (*gorm.DB, error) {
 	dbLogger := logger.New(log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		logger.Config{
-			SlowThreshold:             time.Second, // Slow SQL threshold
-			LogLevel:                  logger.Info, // Log level
-			IgnoreRecordNotFoundError: true,        // Ignore ErrRecordNotFound error for logger
-			Colorful:                  false,       // Disable color
+			SlowThreshold:             time.Second,                                                // Slow SQL threshold
+			LogLevel:                  logger.LogLevel(config.GetInt("logger.sqlLoggerLogLevel")), // Log level
+			IgnoreRecordNotFoundError: true,                                                       // Ignore ErrRecordNotFound error for logger
+			Colorful:                  true,                                                       // Disable color
 		})
 	var conf = DbConf{
 		host:     config.GetString("postgres.url"),

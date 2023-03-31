@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"context"
 	"tickers-parser/internal/entities"
 	"time"
 
@@ -11,6 +10,7 @@ import (
 type ITickerRepository interface {
 	GetTickersForCoin(coin *entities.Coin) []entities.Ticker
 	GetAllTickers() []entities.Ticker
+	GetUnlinkedTickers() []entities.Ticker
 	SaveTickersForExchange(exchangeId uint, tickers []entities.Ticker) (bool, error)
 	UpdateTicker(ticker *entities.Ticker)
 }
@@ -26,13 +26,19 @@ func (r *Repository) SaveTickersForExchange(exchangeId uint, tickers []entities.
 
 func (r *Repository) GetTickersForCoin(coin *entities.Coin) []entities.Ticker {
 	var result []entities.Ticker
-	r.Ticker(true).WithContext(context.Background()).Where("enabled = true").Where(`"base_coin_id"=?`, coin.ID).Find(&result)
+	r.Ticker(true).Where("enabled = true").Where(`"base_coin_id"=?`, coin.ID).Find(&result)
 	return result
 }
 
 func (r *Repository) GetAllTickers() []entities.Ticker {
 	var tickers []entities.Ticker
 	r.Ticker(true).Find(&tickers)
+	return tickers
+}
+
+func (r *Repository) GetUnlinkedTickers() []entities.Ticker {
+	var tickers []entities.Ticker
+	r.Ticker(true).Where("base_coin_id = 0 OR quote_coin_id = 0").Find(&tickers)
 	return tickers
 }
 

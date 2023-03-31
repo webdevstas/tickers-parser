@@ -26,6 +26,7 @@ func StartParserApp() {
 			repository.GetRepository,
 			http_client.GetHttpClient,
 			scheduler.NewTasksService,
+			scheduler.InitScheduler,
 		),
 		fx.Invoke(Register),
 		fx.WithLogger(

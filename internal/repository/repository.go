@@ -22,7 +22,7 @@ type Repository struct {
 	Coin     repositoryFunc
 }
 
-func GetRepository(db *gorm.DB, log logger.Logger) *Repository {
+func GetRepository(db *gorm.DB, log *logger.Logger) *Repository {
 	return &Repository{
 		Exchange: func(new bool) *gorm.DB {
 			return createModel(db, &entities.Exchange{}, new)

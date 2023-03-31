@@ -16,9 +16,9 @@ type Coin struct {
 	Min       float64
 }
 
-func (c *Coin) CalculatePrice(tickers []Ticker, usdtCoins map[string]Coin) {
+func (c *Coin) CalculatePrice(tickers []Ticker, usdtCoins map[string]Coin) bool {
 	if len(tickers) == 0 {
-		return
+		return false
 	}
 
 	var price, volume float64
@@ -36,5 +36,8 @@ func (c *Coin) CalculatePrice(tickers []Ticker, usdtCoins map[string]Coin) {
 	if price > 0 && volume > 0 {
 		c.Price = price / volume
 		c.Volume = volume
+		return true
 	}
+
+	return false
 }
