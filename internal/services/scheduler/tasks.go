@@ -44,7 +44,7 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		DataChannel:   make(chan interface{}, exchangesCount),
 	}
 
-	workersCount := len(exchanges)
+	workersCount := exchangesCount
 
 	defer func() {
 		tickersChannels.CloseAll()
@@ -67,18 +67,21 @@ loop:
 		select {
 		case err := <-tickersChannels.CancelChannel:
 			t.log.Warn(err)
+			queue.RestoreUnconfirmed()
 			continue loop
 		case result := <-tickersChannels.DataChannel:
 			tickers := result
-			queue.Confirm(tickers.Exchange) // Пока так, далее нужно будет реализовать подтверждение и обработать ошибки
+
 			go updater.SaveTickersWorker(tickers, saveChannels, t.repository.SaveTickersForExchange)
 
 			select {
 			case err := <-saveChannels.CancelChannel:
 				t.log.Warn(err)
+				queue.RestoreUnconfirmed()
 				continue loop
 			case <-saveChannels.DataChannel:
 				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange.Key)
+				queue.Confirm(tickers.Exchange)
 			}
 		}
 	}
