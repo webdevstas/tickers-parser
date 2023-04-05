@@ -18,7 +18,7 @@ type ILogger interface {
 }
 
 type Logger struct {
-	*logrus.Logger
+	ILogger
 }
 
 func NewLogger(c *config.Config) *Logger {

@@ -10,7 +10,8 @@
             "request": "launch",
             "mode": "auto",
             "cwd": "${workspaceFolder}",
-            "program": "${workspaceFolder}/cmd/app/parser.go"
+            "program": "${workspaceFolder}/cmd/app/parser.go",
+            "args": ["-race"]
         }
     ]
 }

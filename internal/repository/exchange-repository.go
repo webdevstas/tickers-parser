@@ -20,6 +20,7 @@ func (r Repository) GetExchangesForTickersUpdate() []entities.Exchange {
 			ID:               el.ID,
 			Key:              el.Key,
 			Name:             el.Name,
+			FetchTimeout:     el.FetchTimeout,
 			TickersFetchable: api,
 		}
 	})

@@ -19,16 +19,14 @@ type Scheduler struct {
 }
 
 func (s *Scheduler) RunTask(name string, function TaskFunction, args ...interface{}) (interface{}, error) {
-	s.Logger.Info("-------------------------------------")
 	s.Logger.Info("[scheduler/" + name + "] Task started")
 	start := time.Now()
 	res, err := function(args...)
 	if err != nil {
 		return nil, err
 	}
-	end := time.Since(start).Milliseconds()
-	s.Logger.Info("[scheduler/" + name + "] Task ended in " + strconv.FormatInt(end, 10) + "ms")
-	s.Logger.Info("-------------------------------------")
+	end := time.Since(start).Seconds()
+	s.Logger.Info("[scheduler/" + name + "] Task ended in " + strconv.FormatFloat(end, 'f', 3, 64) + "s")
 	return res, nil
 }
 

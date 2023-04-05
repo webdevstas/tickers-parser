@@ -18,6 +18,7 @@ type Exchange struct {
 	Name             string `json:"name,omitempty"`
 	Enabled          bool   `json:"enabled,omitempty"`
 	TickersFetchable `gorm:"-"`
+	FetchTimeout     uint `json:"-"`
 }
 
 type ExchangeTickers struct {

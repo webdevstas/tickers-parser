@@ -1,7 +1,6 @@
 package scheduler
 
 import (
-	"runtime"
 	"tickers-parser/internal/entities"
 	"tickers-parser/internal/repository"
 	"tickers-parser/internal/services/config"
@@ -25,8 +24,8 @@ type Tasks struct {
 
 func (t *Tasks) RunTasks() {
 	schedule := t.scheduler.ScheduleRecurrentTask
+	go t.scheduler.RunTask("tickers", t.startTickersParsing)
 	go schedule("prices", t.config.GetFloat64("app.pricesInterval")*60*1000, false, t.StartPriceCalculation)
-	go schedule("tickers", t.config.GetFloat64("app.tickersInterval")*60*1000, false, t.startTickersParsing)
 	go schedule("tickers-link", t.config.GetFloat64("app.tickersLinkInterval")*60*1000, false, t.LinkTickersToCoins)
 	go schedule("coins-parse", t.config.GetFloat64("app.coinParseInterval")*60*1000, false, t.ParseCoins)
 }
@@ -45,57 +44,44 @@ func (t *Tasks) startTickersParsing(args ...interface{}) (interface{}, error) {
 		DataChannel:   make(chan interface{}, exchangesCount),
 	}
 
+	workersCount := len(exchanges)
+
 	defer func() {
 		tickersChannels.CloseAll()
 		saveChannels.CloseAll()
 		t.log.Info("[scheduler/tickers] All channels closed")
 	}()
 
-	for _, ex := range exchanges {
-		go func(exchange entities.Exchange, channels utils.ChannelsPair[entities.ExchangeTickers]) {
-			exchangeTickers := entities.ExchangeTickers{
-				Exchange: exchange,
-			}
-			res, err := exchange.FetchTickers(t.httpClient)
-			if err != nil {
-				channels.CancelChannel <- err
-				return
-			}
-			exchangeTickers.Tickers = res
-			channels.DataChannel <- exchangeTickers
-		}(ex, tickersChannels)
-	}
+	queue := updater.NewQueue(exchanges)
 
-	for i := 0; i < exchangesCount; i++ {
+loop:
+	for {
+		for i := 0; i < workersCount; i++ {
+			exchange, ok := queue.Dequeue()
+
+			if ok {
+				go updater.FetchTickersWorker(exchange, tickersChannels, t.httpClient)
+			}
+		}
+
 		select {
 		case err := <-tickersChannels.CancelChannel:
 			t.log.Warn(err)
-			continue
+			continue loop
 		case result := <-tickersChannels.DataChannel:
 			tickers := result
-			go func(channels utils.ChannelsPair[interface{}]) {
-				tickerEntities := utils.Map(tickers.Tickers, func(el entities.ExchangeRawTicker) entities.Ticker {
-					return utils.RawTickerToEntity(tickers.Exchange.ID, el)
-				})
+			queue.Confirm(tickers.Exchange) // Пока так, далее нужно будет реализовать подтверждение и обработать ошибки
+			go updater.SaveTickersWorker(tickers, saveChannels, t.repository.SaveTickersForExchange)
 
-				res, err := t.repository.SaveTickersForExchange(tickers.Exchange.ID, tickerEntities)
-				if err != nil {
-					channels.CancelChannel <- err
-				} else {
-					channels.DataChannel <- res
-				}
-			}(saveChannels)
 			select {
 			case err := <-saveChannels.CancelChannel:
 				t.log.Warn(err)
-				continue
+				continue loop
 			case <-saveChannels.DataChannel:
 				t.log.Info("[scheduler/tickers] Tickers saved for " + tickers.Exchange.Key)
-				runtime.Gosched()
 			}
 		}
 	}
-	return nil, nil
 }
 
 func (t *Tasks) StartPriceCalculation(args ...interface{}) (interface{}, error) {
@@ -127,12 +113,11 @@ func (t *Tasks) LinkTickersToCoins(args ...interface{}) (interface{}, error) {
 
 func (t *Tasks) ParseCoins(args ...interface{}) (interface{}, error) {
 	coins := updater.ParseCoinsFromCryptorank(t.httpClient)
-	chunkLength := 1000
-	done := 0
+	chunkLength, done, coinsLength := 1000, 0, len(coins)
 
-	for i := chunkLength; i <= len(coins); i += chunkLength {
-		if i >= len(coins) {
-			i = len(coins)
+	for i := chunkLength; i <= coinsLength; i += chunkLength {
+		if i >= coinsLength {
+			i = coinsLength
 		}
 		t.repository.InsertCoins(coins[done:i])
 		done += chunkLength
