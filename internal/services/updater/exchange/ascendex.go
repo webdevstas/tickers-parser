@@ -11,7 +11,7 @@ type ascendex struct {
 	entities.Exchange
 }
 
-func GetAscendex() ascendex {
+func getAscendex() ascendex {
 	return ascendex{}
 }
 

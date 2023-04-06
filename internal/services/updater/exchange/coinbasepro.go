@@ -28,7 +28,7 @@ type CoinbaseTicker struct {
 	Time    time.Time
 }
 
-func GetCoinbase() coinbase {
+func getCoinbase() coinbase {
 	return coinbase{}
 }
 
