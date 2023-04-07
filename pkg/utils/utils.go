@@ -36,6 +36,18 @@ func Reduce[T, K any](iterable []T, cb func(K, T) K, initVal K) K {
 	return res
 }
 
+func Find[T comparable](iterable []T, cb func(el T) bool) (found T, index int) {
+	var result T
+	var foundIndex = -1
+	for i, el := range iterable {
+		if cb(el) {
+			result = el
+			foundIndex = i
+		}
+	}
+	return result, foundIndex
+}
+
 func RawTickerToEntity(exchangeId uint, rawTicker entities.ExchangeRawTicker) entities.Ticker {
 	return entities.Ticker{
 		BaseSymbol:   rawTicker.BaseSymbol,
